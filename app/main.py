@@ -1,15 +1,24 @@
 from typing import Optional
 from fastapi import FastAPI, Request, Depends, HTTPException, Form, File
+from starlette.responses import HTMLResponse
+
 from database import *
 from services import *
 from schemas import *
 # from fastapi.templating import Jinja2Templates
 # from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
 
 app = FastAPI()
 
+templates = Jinja2Templates(directory="templates")
+app.mount("/app/static", StaticFiles(directory="static"), name="static")
 
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse(request=request, name="Index.html")
 @app.get("/users")
 async def get_users(db: Session = Depends(get_db)):
     return get_all_users(db)
@@ -58,10 +67,11 @@ async def upload_material(
     benutzer_id: int = Form(...),
     kategorie_id: int = Form(...),
     file: UploadFile = File(...),
+    tag_ids: list[int] = Form([]),
     db: Session = Depends(get_db),
 ):
     return await create_material(
-        db, file, titel, beschreibung, themengebiet_id, benutzer_id, kategorie_id
+        db, file, titel, beschreibung, themengebiet_id, benutzer_id, kategorie_id,tag_ids
     )
 
 

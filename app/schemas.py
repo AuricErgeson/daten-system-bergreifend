@@ -64,5 +64,5 @@ class MaterialBig(MaterialBase):
      pass
 
 class AnzahlMaterialProThemen(BaseModel):
-    themengebiet_id: int
+    name: str
     anzahl:int

@@ -77,7 +77,7 @@ file_type= [
     "application/zip",
 ]
 
-async def create_material(db: Session, file: UploadFile, titel: str, beschreibung: str, themengebiet_id: int, benutzer_id: int, kategorie_id: int):
+async def create_material(db: Session, file: UploadFile, titel: str, beschreibung: str, themengebiet_id: int, benutzer_id: int, kategorie_id: int,tag_ids: list[int] = []):
     inhalt = await file.read()
     dateigroesse = len(inhalt)
     dateiname = file.filename
@@ -120,13 +120,22 @@ async def create_material(db: Session, file: UploadFile, titel: str, beschreibun
         )
 
     db.add(new_material)
+    db.flush()
+
+    for tag_id in tag_ids:
+        link = material_tag(material_id=new_material.id, tag_id=tag_id)
+        db.add(link)
+
     db.commit()
     db.refresh(new_material)
     return new_material
 
 def anzahl_material_pro_themen(db: Session):
-    materials = (db.query(material.themengebiet_id,func.count().label("anzahl"))
-                 .group_by(material.themengebiet_id)
-                 .all())
+    materials = (
+        db.query(themengebiet.name, func.count().label("anzahl"))
+        .join(material, material.themengebiet_id == themengebiet.id)
+        .group_by(themengebiet.name)
+        .all()
+    )
     return materials
 

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lernmaterialverwaltung</title>
+    <script src ="/app/static/js/main.js"></script>
+    <script src ="/app/static/js/extra.js"></script>
+     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/app/static/css/main.css"/>
+</head>
+<body>
+
+<pre class="line">================================================================</pre>
+<pre class="line">        LERNMATERIALIEN - DATEI HOCHLADEN </pre>
+<pre class="line">================================================================</pre>
+
+<div class="gap"></div>
+<pre class="line">Bitte geben Sie die folgenden Informationen ein:</pre>
+<div class="gap"></div>
+<div x-data ="mainForm">
+
+    <form @submit.prevent="upload($event)">
+
+        <pre class="line">&gt; Titel:</pre>
+        <pre class="line">  <input type="text" name="titel" required></pre>
+        <div class="gap"></div>
+
+        <pre class="line">&gt; Beschreibung (optional):</pre>
+        <pre class="line">  <input type="text" name="beschreibung"></pre>
+        <div class="gap"></div>
+
+        <pre class="line">&gt; Datei auswählen:</pre>
+        <pre class="line">  <input type="file" name="file" required></pre>
+        <div class="gap"></div>
+
+        <pre class="line">&gt; Themengebiet auswählen:</pre>
+        <pre class="line">  <select name="themengebiet_id" required>
+            <option value="">--</option>
+            <template x-for="t in themen" :key="t.id">
+                <option :value="t.id" x-text="'[' + t.id + '] ' + t.name"></option>
+            </template>
+        </select></pre>
+        <div class="gap"></div>
+
+        <pre class="line">&gt; Kategorie auswählen:</pre>
+        <pre class="line">  <select name="kategorie_id" required>
+            <option value="">--</option>
+            <template x-for="k in kategorien" :key="k.id">
+                <option :value="k.id" x-text="'[' + k.id + '] ' + k.name"></option>
+            </template>
+        </select></pre>
+        <div class="gap"></div>
+
+        <pre class="line">&gt; Tags auswählen </pre>
+        <pre class="line">  <select name="tag_ids" multiple style="height: 80px;">
+            <template x-for="t in tags" :key="t.id">
+                <option :value="t.id" x-text="'[' + t.id + '] ' + t.name"></option>
+            </template>
+        </select></pre>
+        <div class="gap"></div>
+
+        <pre class="line">&gt; Benutzer auswählen:</pre>
+        <pre class="line">  <select name="benutzer_id" required>
+            <option value="">--</option>
+            <template x-for="u in benutzer" :key="u.id">
+                <option :value="u.id" x-text="'[' + u.id + '] ' + u.username"></option>
+            </template>
+        </select></pre>
+        <div class="gap"></div>
+
+        <pre class="line">----------------------------------------------------------------</pre>
+        <button type="submit">&gt;&gt;&gt; Upload starten</button>
+
+    </form>
+
+    <template x-if="msg">
+        <div>
+            <div class="gap"></div>
+            <pre class="line" :class="ok ? 'ok' : 'err'" x-text="msg"></pre>
+            <pre class="line">================================================================</pre>
+        </div>
+    </template>
+</div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div>
+    <pre class="line">================================================================</pre>
+    <pre class="line">        Standardsuchbefehle </pre>
+    <pre class="line">================================================================</pre>
+</div>
+<div class="gap"></div>
+
+<div x-data="extraForm">
+    <h2>
+        anzahl material pro themen
+        <button x-on:click="loadData">zeig</button>
+    </h2>
+
+    <template x-for="item in materialprothemen" :key="item.name">
+        <div>
+            <span x-text="item.name"></span> -
+            <span x-text="item.anzahl"></span>
+        </div>
+    </template>
+</div>
+</body>
+</html>
