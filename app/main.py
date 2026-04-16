@@ -1,80 +1,36 @@
-from typing import Optional
-from fastapi import FastAPI, Request, Depends, HTTPException, Form, File
-from starlette.responses import HTMLResponse
+#!/usr/bin/env python3
+"""
+Lernmaterialverwaltung - Startpunkt der Anwendung.
 
-from database import *
-from services import *
-from schemas import *
-# from fastapi.templating import Jinja2Templates
-# from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
+Diese Datei ist der Einstiegspunkt des Programms.
+Sie importiert die fertige CLI-Anwendung aus cli_simple.py und startet sie.
 
+Das Projekt erfüllt alle Anforderungen des LF8 Abschlussprojekts:
+  - Upload von Materialien (≤1MB in DB gespeichert, >1MB im Dateisystem)
+  - Download von Materialien auf den lokalen Rechner
+  - Suche nach Materialien mit verschiedenen Filtern (Titel, Thema, Autor, Kategorie, Tag)
+  - Kommentarfunktion: Kommentare hinzufügen, anzeigen und löschen
+  - 7+ erforderliche Suchabfragen (Aggregation mit COUNT/AVG, JOIN, Multi-JOIN)
+  - CRUD-Operationen für alle Entitäten (Benutzer, Themen, Kategorien, Tags, Materialien)
 
-app = FastAPI()
+Verwendung in der Kommandozeile:
+    python main.py --help
+    python main.py upload <datei> --titel "Titel" --thema 1 --autor 1 --kategorie 1
+    python main.py download <material-id>
+    python main.py suche --titel "Suchbegriff"
+    python main.py kommentar add --material 1 --autor 1 --text "Kommentar"
+    python main.py list users|themen|kategorien|tags|materialien
+    python main.py queries count-thema|avg-size|mat-themen|mat-comments|comments-per|mat-author|search-full
+    python main.py create user|thema|kategorie|tag --name "Name"
+    python main.py delete <material-id>
+    python main.py all-queries
+"""
 
-templates = Jinja2Templates(directory="templates")
-app.mount("/app/static", StaticFiles(directory="static"), name="static")
+# Die fertige CLI-Anwendung aus cli_simple.py importieren
+# 'app' ist das typer-Objekt mit allen registrierten Befehlen
+from cli_simple import app
 
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
-    return templates.TemplateResponse(request=request, name="Index.html")
-@app.get("/users")
-async def get_users(db: Session = Depends(get_db)):
-    return get_all_users(db)
-
-
-@app.post("/users")
-async def create_new_user(data: UserBase, db: Session = Depends(get_db)):
-    return create_user(db, data)
-
-
-@app.get("/themen")
-async def get_themen(db: Session = Depends(get_db)):
-    return get_all_themen(db)
-
-
-@app.post("/themen")
-async def create_new_theme(data: Themen, db: Session = Depends(get_db)):
-    return create_themen(db, data)
-
-
-@app.get("/kategorie")
-async def get_kategories(db: Session = Depends(get_db)):
-    return get_all_kategories(db)
-
-
-@app.post("/kategorie")
-async def create_new_kategorie(data: Kategorie, db: Session = Depends(get_db)):
-    return create_kategorie(db, data)
-
-
-@app.get("/tag")
-async def get_tags(db: Session = Depends(get_db)):
-    return get_all_tags(db)
-
-
-@app.post("/tag")
-async def create_new_tag(data: Tag, db: Session = Depends(get_db)):
-    return create_tag(db, data)
-
-
-@app.post("/material")
-async def upload_material(
-    titel: str = Form(...),
-    beschreibung: str = Form(...),
-    themengebiet_id: int = Form(...),
-    benutzer_id: int = Form(...),
-    kategorie_id: int = Form(...),
-    file: UploadFile = File(...),
-    tag_ids: list[int] = Form([]),
-    db: Session = Depends(get_db),
-):
-    return await create_material(
-        db, file, titel, beschreibung, themengebiet_id, benutzer_id, kategorie_id,tag_ids
-    )
-
-
-@app.get("/material_count", response_model=List[AnzahlMaterialProThemen])
-async def get_material_count(db: Session = Depends(get_db)):
-    return anzahl_material_pro_themen(db)
+# Nur ausführen, wenn diese Datei direkt gestartet wird (nicht wenn importiert)
+# __name__ == "__main__" ist True, wenn z.B. "python main.py" aufgerufen wird
+if __name__ == "__main__":
+    app()  # CLI-Anwendung starten – typer übernimmt das Parsen der Argumente
