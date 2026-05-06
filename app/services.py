@@ -1,14 +1,19 @@
+# Hier sind alle Funktionen für die Datenbank.
+# Wir können Materialien hochladen, suchen und löschen.
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from database import *
 import os
 import time
 
+# Ordner für große Dateien
 uploads_dir = "uploads"
 os.makedirs(uploads_dir, exist_ok=True)
 
+# Dateien kleiner als 1 MB kommen direkt in die Datenbank
 MAX_SIZE = 1 * 1024 * 1024
 
+# Liste von erlaubten Dateitypen
 SUPPORTED_FILE_TYPES = {
     "pdf":  "application/pdf",
     "doc":  "application/msword",
@@ -22,12 +27,15 @@ SUPPORTED_FILE_TYPES = {
 }
 
 
+# Alle Benutzer aus der Datenbank holen
 def get_all_users(db):
     return db.query(benutzer).all()
 
+# Einen Benutzer anhand der ID suchen
 def get_user_by_id(db, user_id):
     return db.query(benutzer).filter(benutzer.id == user_id).first()
 
+# Neuen Benutzer anlegen
 def create_user(db, username, email, rolle="Azubi"):
     user = benutzer(username=username, email=email, rolle=rolle)
     db.add(user)
@@ -36,12 +44,15 @@ def create_user(db, username, email, rolle="Azubi"):
     return user
 
 
+# Alle Themengebiete holen
 def get_all_themen(db):
     return db.query(themengebiet).all()
 
+# Ein Themengebiet anhand der ID suchen
 def get_thema_by_id(db, thema_id):
     return db.query(themengebiet).filter(themengebiet.id == thema_id).first()
 
+# Neues Themengebiet anlegen
 def create_thema(db, name, beschreibung=""):
     thema = themengebiet(name=name, beschreibung=beschreibung)
     db.add(thema)
@@ -50,12 +61,15 @@ def create_thema(db, name, beschreibung=""):
     return thema
 
 
+# Alle Kategorien holen
 def get_all_kategories(db):
     return db.query(kategorie).all()
 
+# Eine Kategorie anhand der ID suchen
 def get_kategorie_by_id(db, kategorie_id):
     return db.query(kategorie).filter(kategorie.id == kategorie_id).first()
 
+# Neue Kategorie anlegen
 def create_kategorie(db, name, beschreibung=""):
     kat = kategorie(name=name, beschreibung=beschreibung)
     db.add(kat)
@@ -64,12 +78,15 @@ def create_kategorie(db, name, beschreibung=""):
     return kat
 
 
+# Alle Tags holen
 def get_all_tags(db):
     return db.query(tag).all()
 
+# Einen Tag anhand der ID suchen
 def get_tag_by_id(db, tag_id):
     return db.query(tag).filter(tag.id == tag_id).first()
 
+# Neuen Tag anlegen
 def create_tag(db, name):
     tag_obj = tag(name=name)
     db.add(tag_obj)
@@ -78,13 +95,16 @@ def create_tag(db, name):
     return tag_obj
 
 
+# Alle Materialien holen
 def get_all_materials(db):
     return db.query(material).all()
 
+# Ein Material anhand der ID suchen
 def get_material_by_id(db, material_id):
     return db.query(material).filter(material.id == material_id).first()
 
 
+# Eine Datei hochladen – kleine Dateien kommen in die Datenbank, große auf die Festplatte
 def upload_material(db, file_path, titel, beschreibung, themengebiet_id, benutzer_id, kategorie_id, tag_ids=None):
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Datei nicht gefunden: {file_path}")
@@ -142,6 +162,7 @@ def upload_material(db, file_path, titel, beschreibung, themengebiet_id, benutze
     return new_material
 
 
+# Eine Datei herunterladen – aus Datenbank oder von der Festplatte
 def download_material(db, material_id, output_dir="."):
     mat = db.query(material).filter(material.id == material_id).first()
     if not mat:
@@ -163,6 +184,7 @@ def download_material(db, material_id, output_dir="."):
     return output_path
 
 
+# Materialien suchen – man kann nach Titel, Thema, Autor oder Kategorie filtern
 def search_materials(db, titel=None, themengebiet_id=None, benutzer_id=None, kategorie_id=None, tag_id=None):
     query = db.query(material)
     if titel:
@@ -178,6 +200,7 @@ def search_materials(db, titel=None, themengebiet_id=None, benutzer_id=None, kat
     return query.all()
 
 
+# Ein Material löschen – wenn die Datei auf der Festplatte liegt, wird sie auch gelöscht
 def delete_material(db, material_id):
     mat = db.query(material).filter(material.id == material_id).first()
     if not mat:
@@ -189,9 +212,11 @@ def delete_material(db, material_id):
     return True
 
 
+# Alle Kommentare für ein Material holen
 def get_comments_for_material(db, material_id):
     return db.query(kommentar).filter(kommentar.material_id == material_id).all()
 
+# Neuen Kommentar schreiben
 def create_comment(db, material_id, autor_id, text):
     k = kommentar(material_id=material_id, autor_id=autor_id, text=text)
     db.add(k)
@@ -199,9 +224,11 @@ def create_comment(db, material_id, autor_id, text):
     db.refresh(k)
     return k
 
+# Einen Kommentar anhand der ID suchen
 def get_comment_by_id(db, comment_id):
     return db.query(kommentar).filter(kommentar.id == comment_id).first()
 
+# Einen Kommentar löschen
 def delete_comment(db, comment_id):
     k = db.query(kommentar).filter(kommentar.id == comment_id).first()
     if not k:
@@ -211,6 +238,7 @@ def delete_comment(db, comment_id):
     return True
 
 
+# Abfrage 1: Wie viele Materialien gibt es pro Themengebiet? (COUNT)
 def anzahl_material_pro_themen(db):
     return (
         db.query(themengebiet.name, func.count().label("anzahl"))
@@ -219,6 +247,7 @@ def anzahl_material_pro_themen(db):
         .all()
     )
 
+# Abfrage 2: Wie groß sind die Dateien im Durchschnitt pro Dateityp? (AVG)
 def durchschnitt_dateigroesse_pro_typ(db):
     return (
         db.query(material.dateityp, func.avg(material.dateigroesse).label("durchschnitt"))
@@ -226,6 +255,7 @@ def durchschnitt_dateigroesse_pro_typ(db):
         .all()
     )
 
+# Abfrage 3: Materialien mit ihrem Themengebiet anzeigen (JOIN)
 def materialien_mit_themen(db):
     return (
         db.query(material.titel, material.dateiname, themengebiet.name.label("themengebiet"))
@@ -233,6 +263,7 @@ def materialien_mit_themen(db):
         .all()
     )
 
+# Abfrage 4: Materialien mit ihren Kommentaren anzeigen (JOIN)
 def materialien_mit_kommentaren(db):
     return (
         db.query(material.titel, material.dateiname, kommentar.text, kommentar.erstellungsdatum)
@@ -240,6 +271,7 @@ def materialien_mit_kommentaren(db):
         .all()
     )
 
+# Abfrage 5: Wie viele Kommentare hat jedes Material? (JOIN + COUNT)
 def kommentare_pro_material(db):
     return (
         db.query(material.titel, material.dateiname, func.count(kommentar.id).label("anzahl"))
@@ -248,6 +280,7 @@ def kommentare_pro_material(db):
         .all()
     )
 
+# Abfrage 6: Material mit Autor und Themengebiet anzeigen (zwei JOINs)
 def material_mit_autor_und_thema(db):
     return (
         db.query(
@@ -262,6 +295,7 @@ def material_mit_autor_und_thema(db):
         .all()
     )
 
+# Abfrage 7: Vollständige Suche mit Autor, Thema und Kategorie (drei JOINs)
 def suche_material_mit_filtern(db, thema_id=None, autor_id=None):
     query = (
         db.query(

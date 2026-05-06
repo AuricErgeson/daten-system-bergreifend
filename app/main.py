@@ -1,3 +1,5 @@
+# Das ist das Hauptprogramm – hier startet die Anwendung.
+# Der Benutzer sieht ein Menü und kann eine Zahl eingeben.
 import os
 from rich.console import Console
 from rich.table import Table
@@ -20,10 +22,12 @@ from services import (
 console = Console()
 
 
+# Eine Linie zur Trennung im Menü ausgeben
 def linie():
     print("─" * 50)
 
 
+# Eine Tabelle mit Titel, Spalten und Zeilen ausgeben
 def zeige_tabelle(titel, spalten, zeilen):
     tabelle = Table(title=titel, box=box.ROUNDED)
     for s in spalten:
@@ -33,6 +37,7 @@ def zeige_tabelle(titel, spalten, zeilen):
     console.print(tabelle)
 
 
+# Eine Liste anzeigen und den Benutzer eine Auswahl treffen lassen
 def waehle_aus_liste(eintraege, anzeige_fn):
     if not eintraege:
         console.print("[yellow]Keine Einträge vorhanden.[/yellow]")
@@ -50,6 +55,7 @@ def waehle_aus_liste(eintraege, anzeige_fn):
     return None
 
 
+# Menü zum Hochladen – Benutzer gibt Dateipfad und Infos ein
 def upload_menu():
     console.print("\n[bold cyan]── MATERIAL HOCHLADEN ──[/bold cyan]")
     linie()
@@ -115,6 +121,7 @@ def upload_menu():
             console.print(f"[red]Fehler: {e}[/red]")
 
 
+# Menü zum Herunterladen – Benutzer wählt ein Material und einen Zielordner
 def download_menu():
     console.print("\n[bold cyan]── MATERIAL HERUNTERLADEN ──[/bold cyan]")
     linie()
@@ -149,6 +156,7 @@ def download_menu():
             console.print(f"[red]Fehler: {e}[/red]")
 
 
+# Menü zum Suchen – Benutzer kann nach Titel, Thema oder Autor filtern
 def suche_menu():
     console.print("\n[bold cyan]── MATERIALIEN SUCHEN ──[/bold cyan]")
     linie()
@@ -185,6 +193,7 @@ def suche_menu():
         console.print(f"[green]{len(ergebnisse)} Ergebnis(se)[/green]")
 
 
+# Menü zum Löschen – Benutzer wählt ein Material und bestätigt das Löschen
 def loeschen_menu():
     console.print("\n[bold cyan]── MATERIAL LÖSCHEN ──[/bold cyan]")
     linie()
@@ -216,6 +225,7 @@ def loeschen_menu():
             console.print(f"[red]Fehler: {e}[/red]")
 
 
+# Menü für Kommentare – anzeigen, hinzufügen oder löschen
 def kommentar_menu():
     while True:
         console.print("\n[bold cyan]── KOMMENTARE ──[/bold cyan]")
@@ -281,6 +291,7 @@ def kommentar_menu():
             console.print("[red]Ungültige Eingabe.[/red]")
 
 
+# Menü für Listen – alle Materialien, Benutzer, Themen, Kategorien oder Tags anzeigen
 def listen_menu():
     while True:
         console.print("\n[bold cyan]── LISTEN ──[/bold cyan]")
@@ -320,6 +331,7 @@ def listen_menu():
                 console.print("[red]Ungültige Eingabe.[/red]")
 
 
+# Menü für die 7 Datenbankabfragen – jede Abfrage zeigt andere Informationen
 def abfragen_menu():
     while True:
         console.print("\n[bold cyan]── DATENBANK-ABFRAGEN ──[/bold cyan]")
@@ -423,6 +435,7 @@ def abfragen_menu():
         print()
 
 
+# Menü für neue Einträge – Benutzer, Themen, Kategorien oder Tags anlegen
 def erstellen_menu():
     while True:
         console.print("\n[bold cyan]── NEUE EINTRÄGE ──[/bold cyan]")
@@ -470,6 +483,7 @@ def erstellen_menu():
                 console.print(f"[red]Fehler: {e}[/red]")
 
 
+# Das Hauptmenü – hier startet alles, Benutzer wählt was er machen möchte
 def hauptmenu():
     while True:
         console.print("\n[bold blue]╔══════════════════════════════════════╗[/bold blue]")

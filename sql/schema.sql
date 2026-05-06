@@ -31,6 +31,7 @@ CREATE TABLE kategorie (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     name         VARCHAR(100) NOT NULL UNIQUE,
     beschreibung TEXT
+);
 
 
 CREATE TABLE tag (

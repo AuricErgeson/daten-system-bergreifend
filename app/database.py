@@ -1,3 +1,5 @@
+# Hier verbinden wir uns mit der MySQL-Datenbank.
+# Die Zugangsdaten kommen aus der .env Datei.
 from sqlalchemy import *
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.automap import automap_base
@@ -6,8 +8,10 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import os
 
+# .env Datei laden – dort stehen Passwort und Datenbankname
 load_dotenv(dotenv_path=r'C:\Users\auric\Desktop\Auric\Learning Stuff\Python\daten-system-bergreifend\.env')
 
+# Verbindungsadresse für die Datenbank zusammenbauen
 mysql_url = URL.create(
     drivername=os.getenv("DB_DRIVER") or "mysql+pymysql",
     username=os.getenv("DB_USERNAME") or "root",
@@ -17,12 +21,17 @@ mysql_url = URL.create(
     database=os.getenv("DB_NAME") or "lernmaterialverwaltung"
 )
 
+# Verbindung zur Datenbank herstellen
 engine = create_engine(mysql_url)
+
+# SessionLocal öffnet eine neue Verbindung wenn wir sie brauchen
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# SQLAlchemy liest die Tabellen automatisch aus der Datenbank
 Base = automap_base()
 Base.prepare(autoload_with=engine)
 
+# Jede Tabelle bekommt einen Namen in Python
 benutzer     = Base.classes.benutzer
 kategorie    = Base.classes.kategorie
 kommentar    = Base.classes.kommentar
