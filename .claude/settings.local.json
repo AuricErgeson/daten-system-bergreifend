@@ -3,7 +3,20 @@
     "allow": [
       "Bash(pip install *)",
       "Bash(python generate_doc.py)",
-      "Bash(dir \"C:\\\\Users\\\\Auric\\\\Desktop\\\\Auric\\\\Schule\\\\daten-system-bergreifend\\\\LF8_Dokumentation.docx\")"
+      "Bash(dir \"C:\\\\Users\\\\Auric\\\\Desktop\\\\Auric\\\\Schule\\\\daten-system-bergreifend\\\\LF8_Dokumentation.docx\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\auric\\\\Desktop\\\\Schule\\\\daten-system-bergreifend\" -Recurse -Force -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\auric\\\\Desktop\\\\Schule\\\\daten-system-bergreifend\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\auric\\\\Desktop\\\\Schule\\\\daten-system-bergreifend\" -Recurse -Force | Where-Object { $_.PSIsContainer } | Select-Object FullName | Sort-Object FullName)",
+      "Skill(humanizer)",
+      "Bash(npm list *)",
+      "Bash(npm install *)",
+      "Bash(node generate_doc.js)",
+      "Bash(python -c \"import zipfile; zf = zipfile.ZipFile\\('LF8_Dokumentation.docx'\\); print\\('\\\\n'.join\\(zf.namelist\\(\\)[:15]\\)\\); print\\('---'\\); print\\('Total files:', len\\(zf.namelist\\(\\)\\)\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(del test_out.docx)"
     ]
   }
 }
