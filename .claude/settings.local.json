@@ -16,7 +16,8 @@
       "Bash(python -c \"import zipfile; zf = zipfile.ZipFile\\('LF8_Dokumentation.docx'\\); print\\('\\\\n'.join\\(zf.namelist\\(\\)[:15]\\)\\); print\\('---'\\); print\\('Total files:', len\\(zf.namelist\\(\\)\\)\\)\")",
       "Bash(python -c ' *)",
       "Bash(node -e ' *)",
-      "Bash(del test_out.docx)"
+      "Bash(del test_out.docx)",
+      "Bash(Get-ChildItem C:\\\\Users\\\\auric\\\\Desktop\\\\Schule\\\\daten-system-bergreifend *)"
     ]
   }
 }
