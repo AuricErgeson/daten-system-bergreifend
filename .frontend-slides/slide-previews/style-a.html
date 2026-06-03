@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Style A — Swiss Modern</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Nunito:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* === VIEWPORT BASE === */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+@media print {
+  html, body { width: 1920px; height: auto; overflow: visible; }
+  .deck-viewport { position: static; overflow: visible; }
+  .deck-stage { position: static; width: auto; height: auto; transform: none !important; }
+  .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; width: 1920px; height: 1080px; break-after: page; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } }
+
+/* === SWISS MODERN STYLE === */
+:root {
+  --red: #C8201A;
+  --black: #111111;
+  --gray-dark: #2A2A2A;
+  --gray-mid: #7A7A7A;
+  --gray-light: #E4E4E4;
+  --gray-ultra: #F5F5F5;
+  --white: #FFFFFF;
+  --slide-bg: #FFFFFF;
+  --stage-bg: #1a1a1a;
+}
+
+.slide-a {
+  background: #FFFFFF;
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Red left stripe */
+.a-stripe {
+  position: absolute;
+  left: 0; top: 0;
+  width: 16px; height: 100%;
+  background: var(--red);
+}
+
+/* Structural grid lines */
+.a-grid-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: var(--gray-light);
+}
+
+/* Top section */
+.a-topbar {
+  position: absolute;
+  top: 68px; left: 96px; right: 96px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 28px;
+  border-bottom: 2px solid var(--black);
+}
+
+.a-eyebrow {
+  font-family: 'Courier Prime', monospace;
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gray-mid);
+}
+
+.a-slide-num {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 88px;
+  color: var(--gray-light);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+/* Main content block */
+.a-content {
+  position: absolute;
+  left: 96px;
+  top: 228px;
+  right: 340px;
+}
+
+.a-title {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 134px;
+  line-height: 0.92;
+  color: var(--black);
+  letter-spacing: -0.025em;
+  margin: 0;
+  word-break: break-word;
+}
+
+.a-title-accent {
+  color: var(--red);
+}
+
+.a-rule {
+  width: 100px;
+  height: 8px;
+  background: var(--red);
+  margin: 56px 0 48px;
+}
+
+.a-subtitle {
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--gray-dark);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  max-width: 900px;
+}
+
+/* Right column — classification box */
+.a-aside {
+  position: absolute;
+  right: 96px;
+  top: 228px;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.a-aside-item {
+  border: 1px solid var(--gray-light);
+  padding: 28px 24px;
+  border-bottom: none;
+}
+.a-aside-item:last-child { border-bottom: 1px solid var(--gray-light); }
+
+.a-aside-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gray-mid);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.a-aside-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+/* Footer */
+.a-footer {
+  position: absolute;
+  bottom: 60px;
+  left: 96px; right: 96px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--gray-light);
+  padding-top: 28px;
+}
+
+.a-meta {
+  font-size: 22px;
+  color: var(--gray-mid);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.a-badge {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Courier Prime', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 28px;
+}
+
+/* === ANIMATIONS === */
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(-48px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes expandWidth {
+  from { width: 0; }
+  to   { width: 100px; }
+}
+
+.slide.active .a-topbar    { animation: fadeUp 0.5s 0.05s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .a-title     { animation: slideLeft 0.75s 0.15s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .a-rule      { animation: expandWidth 0.5s 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .a-subtitle  { animation: fadeUp 0.55s 0.65s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .a-aside     { animation: fadeUp 0.55s 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .a-footer    { animation: fadeUp 0.45s 0.85s cubic-bezier(0.16,1,0.3,1) both; }
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+  <div class="deck-stage">
+    <div class="slide slide-a active">
+
+      <div class="a-stripe"></div>
+      <div class="a-grid-line" style="left: 840px;"></div>
+      <div class="a-grid-line" style="left: 1584px;"></div>
+
+      <div class="a-topbar">
+        <span class="a-eyebrow">LF8-Abschlussprojekt &nbsp;·&nbsp; Daten systemübergreifend bereitstellen</span>
+        <span class="a-slide-num">01</span>
+      </div>
+
+      <div class="a-content">
+        <h1 class="a-title">Lernmaterial<br><span class="a-title-accent">verwaltung</span></h1>
+        <div class="a-rule"></div>
+        <p class="a-subtitle">Zentrales Materialmanagementsystem<br>auf Python &amp; MySQL-Basis</p>
+      </div>
+
+      <div class="a-aside">
+        <div class="a-aside-item">
+          <span class="a-aside-label">Lernfeld</span>
+          <span class="a-aside-value">LF 8</span>
+        </div>
+        <div class="a-aside-item">
+          <span class="a-aside-label">Zeitraum</span>
+          <span class="a-aside-value">Apr – Mai 2026</span>
+        </div>
+        <div class="a-aside-item">
+          <span class="a-aside-label">Aufwand</span>
+          <span class="a-aside-value">43 Stunden</span>
+        </div>
+        <div class="a-aside-item">
+          <span class="a-aside-label">Technologie</span>
+          <span class="a-aside-value">Python · MySQL</span>
+        </div>
+      </div>
+
+      <div class="a-footer">
+        <span class="a-meta">Auric Ergeson &nbsp;·&nbsp; Azubi Anwendungsentwickler &nbsp;·&nbsp; Mai 2026</span>
+        <span class="a-badge">Berufsschule</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+function fitStage() {
+  const s = document.querySelector('.deck-stage');
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const sc = Math.min(vw / 1920, vh / 1080);
+  const tx = (vw - 1920 * sc) / 2;
+  const ty = (vh - 1080 * sc) / 2;
+  s.style.transform = `translate(${tx}px,${ty}px) scale(${sc})`;
+}
+fitStage();
+window.addEventListener('resize', fitStage);
+</script>
+</body>
+</html>

@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lernmaterialverwaltung — LF8 Präsentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+/* === CSS VARIABLES === */
+:root {
+  --red:        #C8201A;
+  --red-light:  #FFF0EF;
+  --red-mid:    #E8C5C4;
+  --black:      #111111;
+  --gray-dark:  #2A2A2A;
+  --gray-mid:   #7A7A7A;
+  --gray-light: #E4E4E4;
+  --gray-ultra: #F7F7F7;
+  --white:      #FFFFFF;
+  --green-dark: #1A4D2E;
+
+  --font-display: 'Archivo Black', sans-serif;
+  --font-body:    'Nunito', sans-serif;
+  --font-mono:    'Courier Prime', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --stage-bg: #1a1a1a;
+  --slide-bg: #ffffff;
+}
+
+/* === VIEWPORT BASE (mandatory) === */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: #fff; }
+.slide.active { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+@media print {
+  html, body { width: 1920px; height: auto; overflow: visible; }
+  .deck-viewport { position: static; overflow: visible; }
+  .deck-stage { position: static; transform: none !important; }
+  .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; break-after: page; }
+  .deck-controls, .edit-hotzone, .edit-toggle { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } }
+
+/* === ANIMATION KEYFRAMES === */
+@keyframes swissFadeUp   { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+@keyframes swissSlideLeft{ from { opacity:0; transform:translateX(-48px); } to { opacity:1; transform:translateX(0); } }
+@keyframes swissExpandW  { from { width:0; } to { width:100%; } }
+@keyframes swissBarsGrow { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+@keyframes swissFadeIn   { from { opacity:0; } to { opacity:1; } }
+
+/* Animation helper classes — triggered by .slide.active */
+.slide.active .sa1 { animation: swissFadeUp 0.5s 0.05s var(--ease-out-expo) both; }
+.slide.active .sa2 { animation: swissFadeUp 0.55s 0.15s var(--ease-out-expo) both; }
+.slide.active .sa3 { animation: swissFadeUp 0.5s 0.25s var(--ease-out-expo) both; }
+.slide.active .sa4 { animation: swissFadeUp 0.5s 0.35s var(--ease-out-expo) both; }
+.slide.active .sa5 { animation: swissFadeUp 0.5s 0.45s var(--ease-out-expo) both; }
+.slide.active .sa6 { animation: swissFadeUp 0.5s 0.55s var(--ease-out-expo) both; }
+.slide.active .sa7 { animation: swissFadeUp 0.5s 0.65s var(--ease-out-expo) both; }
+.slide.active .sa-left  { animation: swissSlideLeft 0.7s 0.15s var(--ease-out-expo) both; }
+.slide.active .sa-left2 { animation: swissSlideLeft 0.7s 0.25s var(--ease-out-expo) both; }
+.slide.active .sa-left3 { animation: swissSlideLeft 0.65s 0.35s var(--ease-out-expo) both; }
+.slide.active .sa-fade  { animation: swissFadeIn 0.6s 0.4s both; }
+
+/* === COMMON SLIDE STRUCTURE === */
+.s-stripe { position:absolute; left:0; top:0; width:16px; height:100%; background:var(--red); }
+.s-grid-v { position:absolute; top:0; bottom:0; width:1px; background:var(--gray-light); }
+
+/* Header bar */
+.s-header {
+  position:absolute; top:68px; left:96px; right:96px;
+  display:flex; justify-content:space-between; align-items:flex-end;
+  padding-bottom:24px;
+  border-bottom:2px solid var(--black);
+}
+.s-eyebrow {
+  font-family:var(--font-mono); font-size:20px; font-weight:400;
+  letter-spacing:0.16em; text-transform:uppercase; color:var(--gray-mid);
+}
+.s-num {
+  font-family:var(--font-display); font-size:84px; color:var(--gray-light);
+  line-height:1; letter-spacing:-0.04em;
+}
+
+/* Content area (top=196, bottom=980) */
+.s-body {
+  position:absolute; top:196px; left:96px; right:96px; bottom:100px;
+}
+
+/* Slide title inside body */
+.s-title {
+  font-family:var(--font-display); font-size:72px; color:var(--black);
+  line-height:1; margin-bottom:44px;
+}
+.s-title-accent { color:var(--red); }
+
+/* Red rule */
+.s-rule {
+  width:80px; height:6px; background:var(--red); margin-bottom:44px;
+}
+
+/* Footer */
+.s-footer {
+  position:absolute; bottom:0; left:96px; right:96px; height:96px;
+  border-top:1px solid var(--gray-light);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.s-footer-meta {
+  font-family:var(--font-body); font-size:20px; color:var(--gray-mid); font-weight:500;
+}
+.s-footer-prog {
+  font-family:var(--font-mono); font-size:18px; color:var(--gray-light); letter-spacing:0.08em;
+}
+
+/* === SLIDE 1 — TITELFOLIE === */
+.s1 { background:#fff; }
+.s1-main {
+  position:absolute; left:96px; top:220px; right:340px;
+}
+.s1-title {
+  font-family:var(--font-display); font-size:130px; line-height:0.92;
+  color:var(--black); letter-spacing:-0.025em;
+}
+.s1-title-red { color:var(--red); }
+.s1-rule { width:100px; height:8px; background:var(--red); margin:52px 0 44px; }
+.s1-sub {
+  font-family:var(--font-body); font-size:30px; font-weight:600;
+  color:var(--gray-dark); text-transform:uppercase; letter-spacing:0.05em;
+  line-height:1.4;
+}
+.s1-aside {
+  position:absolute; right:96px; top:220px; width:256px;
+  display:flex; flex-direction:column;
+}
+.s1-aside-item {
+  border:1px solid var(--gray-light); padding:26px 22px;
+  border-bottom:none;
+}
+.s1-aside-item:last-child { border-bottom:1px solid var(--gray-light); }
+.s1-aside-label {
+  display:block; font-family:var(--font-mono); font-size:13px;
+  letter-spacing:0.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:8px;
+}
+.s1-aside-value { font-family:var(--font-body); font-size:19px; font-weight:600; color:var(--black); }
+.s1-footer {
+  position:absolute; bottom:56px; left:96px; right:96px;
+  display:flex; justify-content:space-between; align-items:center;
+  border-top:1px solid var(--gray-light); padding-top:24px;
+}
+.s1-meta { font-family:var(--font-body); font-size:22px; color:var(--gray-mid); font-weight:500; }
+.s1-badge {
+  background:var(--black); color:#fff;
+  font-family:var(--font-mono); font-size:15px; font-weight:700;
+  letter-spacing:0.14em; text-transform:uppercase; padding:12px 26px;
+}
+
+/* === SLIDE 2 — AGENDA === */
+.s2-items {
+  display:grid; grid-template-columns:1fr 1fr; gap:0 80px;
+  padding-top:8px;
+}
+.s2-item {
+  display:flex; align-items:baseline; gap:20px;
+  padding:18px 0; border-bottom:1px solid var(--gray-light);
+}
+.s2-item-num {
+  font-family:var(--font-display); font-size:44px; color:var(--red);
+  line-height:1; min-width:60px; flex-shrink:0;
+}
+.s2-item-text {
+  font-family:var(--font-body); font-size:34px; font-weight:600;
+  color:var(--gray-dark); line-height:1.2;
+}
+
+/* === SLIDE 3 — AUSGANGSSITUATION === */
+.s3-quote {
+  font-family:var(--font-body); font-style:italic; font-size:40px;
+  font-weight:600; color:var(--gray-dark); line-height:1.4;
+  border-left:6px solid var(--red); padding-left:36px;
+  margin-bottom:52px; max-width:1400px;
+}
+.s3-cards {
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:32px;
+}
+.s3-card {
+  border:1px solid var(--gray-light); border-left:5px solid var(--red);
+  padding:32px 28px;
+}
+.s3-card-title {
+  font-family:var(--font-display); font-size:28px; color:var(--black);
+  margin-bottom:16px;
+}
+.s3-card-text {
+  font-family:var(--font-body); font-size:26px; font-weight:400;
+  color:var(--gray-dark); line-height:1.45;
+}
+
+/* === SLIDE 4 — AUFGABENSTELLUNG === */
+.s4-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:48px; height:100%;
+}
+.s4-col-title {
+  font-family:var(--font-mono); font-size:16px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--gray-mid); margin-bottom:28px;
+}
+.s4-goal-item {
+  display:flex; gap:16px; align-items:flex-start;
+  padding:18px 0; border-bottom:1px solid var(--gray-light);
+}
+.s4-check {
+  font-family:var(--font-display); font-size:22px; color:var(--red);
+  min-width:28px; margin-top:4px;
+}
+.s4-goal-text {
+  font-family:var(--font-body); font-size:28px; font-weight:500;
+  color:var(--black); line-height:1.3;
+}
+.s4-scope-box {
+  border:2px solid var(--gray-light); padding:32px 28px; margin-top:16px;
+}
+.s4-scope-title {
+  font-family:var(--font-mono); font-size:14px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--gray-mid); margin-bottom:20px;
+}
+.s4-scope-item {
+  display:flex; gap:16px; align-items:flex-start;
+  padding:12px 0; border-bottom:1px solid var(--gray-light);
+}
+.s4-scope-item:last-child { border-bottom:none; }
+.s4-cross { font-size:20px; color:var(--gray-mid); min-width:20px; margin-top:4px; }
+.s4-scope-text { font-family:var(--font-body); font-size:26px; font-weight:400; color:var(--gray-mid); }
+
+/* === SLIDE 5 — PROJEKTPLANUNG === */
+.s5-flow {
+  display:flex; align-items:center; justify-content:flex-start;
+  gap:0; margin-bottom:48px;
+}
+.s5-box {
+  width:256px; height:150px; border:2px solid var(--gray-light);
+  padding:20px 22px; display:flex; flex-direction:column;
+  justify-content:space-between; background:var(--white);
+  transition:border-color 0.2s;
+}
+.s5-box-num {
+  font-family:var(--font-mono); font-size:14px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--gray-mid);
+}
+.s5-box-name {
+  font-family:var(--font-display); font-size:23px; color:var(--black);
+  line-height:1.15;
+}
+.s5-box-hours {
+  font-family:var(--font-mono); font-size:18px; color:var(--red);
+  font-weight:700;
+}
+.s5-arrow {
+  width:48px; text-align:center; font-size:28px; color:var(--red);
+  font-family:var(--font-body); font-weight:700; flex-shrink:0;
+}
+.s5-rationale {
+  background:var(--gray-ultra); border-left:5px solid var(--red);
+  padding:24px 28px;
+}
+.s5-rationale-label {
+  font-family:var(--font-mono); font-size:14px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--gray-mid); margin-bottom:10px;
+}
+.s5-rationale-text {
+  font-family:var(--font-body); font-size:28px; font-weight:500;
+  color:var(--gray-dark); line-height:1.4;
+}
+
+/* === SLIDE 6 — LÖSUNGSKONZEPT === */
+.s6-table { width:100%; border-collapse:collapse; }
+.s6-table th {
+  font-family:var(--font-mono); font-size:16px; letter-spacing:0.12em;
+  text-transform:uppercase; color:var(--gray-mid);
+  padding:16px 20px; text-align:left;
+  border-bottom:2px solid var(--black);
+  background:#fff;
+}
+.s6-table td {
+  font-family:var(--font-body); font-size:26px; font-weight:500;
+  color:var(--gray-dark); padding:20px 20px;
+  border-bottom:1px solid var(--gray-light); vertical-align:middle;
+}
+.s6-table tr.s6-chosen td {
+  background:var(--red-light); color:var(--black); font-weight:700;
+  border-left:5px solid var(--red);
+}
+.s6-table tr.s6-chosen td:first-child { border-left:5px solid var(--red); }
+.s6-icon { font-size:22px; }
+
+/* === SLIDE 7 — DATENBANKDESIGN === */
+.s7-grid {
+  display:grid; grid-template-columns:720px 1fr; gap:48px; height:100%;
+}
+.s7-decisions { display:flex; flex-direction:column; gap:28px; }
+.s7-decision {
+  border:1px solid var(--gray-light); border-left:5px solid var(--red);
+  padding:24px 24px;
+}
+.s7-dec-title {
+  font-family:var(--font-display); font-size:26px; color:var(--black); margin-bottom:10px;
+}
+.s7-dec-text {
+  font-family:var(--font-body); font-size:24px; font-weight:400;
+  color:var(--gray-dark); line-height:1.4;
+}
+.s7-dec-code {
+  font-family:var(--font-mono); font-size:18px; color:var(--red);
+  background:var(--red-light); padding:4px 10px; margin-top:8px;
+  display:inline-block;
+}
+.s7-erd {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:100%; gap:16px;
+}
+.s7-erd img {
+  max-width:100%; max-height:660px; object-fit:contain;
+  border:1px solid var(--gray-light);
+}
+.s7-erd-caption {
+  font-family:var(--font-mono); font-size:15px; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--gray-mid);
+}
+
+/* === SLIDE 8 — SYSTEMARCHITEKTUR === */
+.s8-grid {
+  display:grid; grid-template-columns:700px 1fr; gap:64px; height:100%;
+}
+.s8-arch { display:flex; flex-direction:column; justify-content:center; gap:0; }
+.s8-layer {
+  padding:28px 32px; border:2px solid var(--gray-light);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.s8-layer--top { border-bottom:none; background:var(--gray-ultra); }
+.s8-layer--mid { border-bottom:none; border-left:5px solid var(--red); background:#fff; }
+.s8-layer--bot { background:var(--black); }
+.s8-layer-label {
+  font-family:var(--font-display); font-size:28px; color:var(--black);
+}
+.s8-layer--bot .s8-layer-label { color:#fff; }
+.s8-layer-desc {
+  font-family:var(--font-body); font-size:20px; color:var(--gray-mid); font-weight:500;
+}
+.s8-layer--bot .s8-layer-desc { color:rgba(255,255,255,0.6); }
+.s8-layer-tech {
+  font-family:var(--font-mono); font-size:17px; color:var(--red);
+  text-align:right; line-height:1.4;
+}
+.s8-layer--bot .s8-layer-tech { color:#C8A870; }
+.s8-connector {
+  display:flex; align-items:center; justify-content:flex-start;
+  padding:0 0 0 80px; height:36px;
+  font-size:24px; color:var(--red);
+}
+.s8-fns {
+  display:grid; grid-template-columns:1fr 1fr; gap:20px;
+  align-content:start; padding-top:8px;
+}
+.s8-fn {
+  border:1px solid var(--gray-light); padding:18px 20px;
+  display:flex; align-items:center; gap:16px;
+}
+.s8-fn-num {
+  font-family:var(--font-display); font-size:22px; color:var(--red);
+  min-width:32px;
+}
+.s8-fn-name {
+  font-family:var(--font-body); font-size:22px; font-weight:600; color:var(--black);
+}
+
+/* === SLIDE 9 — HERAUSFORDERUNGEN === */
+.s9-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:40px; height:100%;
+}
+.s9-card { border:1px solid var(--gray-light); display:flex; flex-direction:column; }
+.s9-card-header {
+  padding:24px 28px; border-bottom:2px solid var(--black);
+  background:var(--black);
+}
+.s9-card-num {
+  font-family:var(--font-mono); font-size:14px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--gray-mid); margin-bottom:8px;
+}
+.s9-card-title { font-family:var(--font-display); font-size:28px; color:#fff; }
+.s9-section { padding:24px 28px; border-bottom:1px solid var(--gray-light); }
+.s9-section:last-child { border-bottom:none; flex:1; }
+.s9-section-label {
+  font-family:var(--font-mono); font-size:13px; letter-spacing:0.14em;
+  text-transform:uppercase; margin-bottom:12px;
+}
+.s9-section-label--prob { color:var(--red); }
+.s9-section-label--sol  { color:var(--green-dark); }
+.s9-section-text {
+  font-family:var(--font-body); font-size:25px; font-weight:400;
+  color:var(--gray-dark); line-height:1.45;
+}
+
+/* === SLIDE 10 — SOLL-IST === */
+.s10-grid {
+  display:grid; grid-template-columns:780px 1fr; gap:60px; height:100%;
+}
+/* Table */
+.s10-table { width:100%; border-collapse:collapse; }
+.s10-table th {
+  font-family:var(--font-mono); font-size:15px; letter-spacing:0.12em;
+  text-transform:uppercase; color:var(--gray-mid); padding:14px 16px;
+  text-align:left; border-bottom:2px solid var(--black);
+}
+.s10-table td {
+  font-family:var(--font-body); font-size:26px; font-weight:500;
+  color:var(--gray-dark); padding:18px 16px;
+  border-bottom:1px solid var(--gray-light);
+}
+.s10-table tr.s10-total td {
+  font-weight:700; color:var(--black);
+  border-top:2px solid var(--black); border-bottom:none;
+}
+.s10-actual { color:var(--red) !important; font-weight:700 !important; }
+.s10-delta  { color:var(--red) !important; }
+/* Right side */
+.s10-right { display:flex; flex-direction:column; justify-content:center; gap:40px; }
+.s10-big {
+  display:flex; align-items:baseline; gap:16px;
+}
+.s10-big-num {
+  font-family:var(--font-display); font-size:110px; line-height:0.9;
+}
+.s10-big-num--plan { color:var(--gray-light); }
+.s10-big-num--act  { color:var(--red); }
+.s10-big-arrow { font-size:48px; color:var(--gray-mid); }
+.s10-big-label { font-family:var(--font-mono); font-size:16px; letter-spacing:0.12em; text-transform:uppercase; color:var(--gray-mid); }
+.s10-pct {
+  font-family:var(--font-display); font-size:64px; color:var(--red);
+  line-height:1;
+}
+.s10-pct-label { font-family:var(--font-body); font-size:24px; color:var(--gray-mid); font-weight:500; }
+.s10-why {
+  background:var(--gray-ultra); border-left:5px solid var(--red);
+  padding:20px 24px;
+}
+.s10-why-label {
+  font-family:var(--font-mono); font-size:13px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--gray-mid); margin-bottom:8px;
+}
+.s10-why-text {
+  font-family:var(--font-body); font-size:24px; font-weight:500;
+  color:var(--gray-dark); line-height:1.4;
+}
+
+/* === SLIDE 11 — ERGEBNIS === */
+.s11-metrics {
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:32px;
+  margin-bottom:44px;
+}
+.s11-metric {
+  border:1px solid var(--gray-light); padding:32px 28px;
+  border-top:5px solid var(--red);
+}
+.s11-metric-num {
+  font-family:var(--font-display); font-size:80px; color:var(--red);
+  line-height:1; margin-bottom:8px;
+}
+.s11-metric-label {
+  font-family:var(--font-body); font-size:26px; font-weight:600; color:var(--black);
+}
+.s11-metric-sub {
+  font-family:var(--font-body); font-size:20px; color:var(--gray-mid); margin-top:6px;
+}
+/* Terminal mockup */
+.s11-terminal {
+  background:#0d1117; border-radius:0; border:1px solid #30363d;
+  padding:0; overflow:hidden;
+}
+.s11-term-bar {
+  background:#21262d; padding:10px 16px;
+  display:flex; align-items:center; gap:8px;
+}
+.s11-term-dot { width:12px; height:12px; border-radius:50%; }
+.s11-term-body { padding:16px 20px; }
+.s11-term-line {
+  font-family:'Courier Prime', monospace; font-size:18px;
+  line-height:1.65; white-space:pre;
+}
+.t-prompt  { color:#58a6ff; }
+.t-header  { color:#e6edf3; }
+.t-border  { color:#30363d; }
+.t-id      { color:#79c0ff; }
+.t-title   { color:#e6edf3; }
+.t-subject { color:#7ee787; }
+.t-size    { color:#ffa657; }
+.t-dim     { color:#6e7681; }
+
+/* === SLIDE 12 — FAZIT === */
+.s12-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:60px; height:100%;
+}
+.s12-col-title {
+  font-family:var(--font-mono); font-size:15px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--gray-mid); margin-bottom:28px;
+  padding-bottom:16px; border-bottom:2px solid var(--black);
+}
+.s12-item {
+  display:flex; gap:16px; align-items:flex-start;
+  padding:20px 0; border-bottom:1px solid var(--gray-light);
+}
+.s12-icon { font-size:24px; min-width:32px; }
+.s12-item-text {
+  font-family:var(--font-body); font-size:28px; font-weight:500;
+  color:var(--gray-dark); line-height:1.35;
+}
+.s12-closing {
+  grid-column:1 / -1;
+  border-top:3px solid var(--red); padding-top:32px; margin-top:auto;
+}
+.s12-closing-text {
+  font-family:var(--font-body); font-style:italic; font-size:34px;
+  font-weight:600; color:var(--gray-dark); line-height:1.4;
+  max-width:1400px;
+}
+
+/* === NAV CONTROLS === */
+.deck-controls {
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+  z-index:10000; display:flex; align-items:center; gap:20px;
+  background:rgba(17,17,17,0.85); backdrop-filter:blur(8px);
+  border-radius:4px; padding:10px 20px;
+}
+.nav-btn {
+  background:none; border:1px solid rgba(255,255,255,0.25); color:#fff;
+  font-size:18px; cursor:pointer; padding:6px 16px; border-radius:2px;
+  transition:background 0.15s, border-color 0.15s;
+}
+.nav-btn:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.5); }
+.nav-counter {
+  font-family:'Courier Prime', monospace; font-size:16px; color:rgba(255,255,255,0.6);
+  min-width:50px; text-align:center;
+}
+
+/* === EDIT CONTROLS === */
+.edit-hotzone {
+  position:fixed; top:0; left:0; width:80px; height:80px;
+  z-index:10000; cursor:pointer;
+}
+.edit-toggle {
+  position:fixed; top:12px; left:12px; z-index:10001;
+  background:rgba(17,17,17,0.85); color:#fff; border:1px solid rgba(255,255,255,0.25);
+  border-radius:3px; padding:6px 10px; font-size:16px; cursor:pointer;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.edit-toggle.show, .edit-toggle.active { opacity:1; pointer-events:auto; }
+[contenteditable]:focus { outline:2px dashed var(--red); outline-offset:3px; }
+
+</style>
+</head>
+<body>
+
+<div class="edit-hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Bearbeiten (E)">✏</button>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ============================================================ -->
+<!-- SLIDE 1 — TITELFOLIE                                         -->
+<!-- ============================================================ -->
+<!-- NOTES: Kurze Begrüßung. Name, Projekt, Lernfeld nennen. 30 s -->
+<section class="slide s1 active" data-slide="1">
+  <div class="s-stripe"></div>
+  <div class="s-grid-v" style="left:840px"></div>
+  <div class="s-grid-v" style="left:1584px"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">LF8-Abschlussprojekt &nbsp;·&nbsp; Daten systemübergreifend bereitstellen</span>
+    <span class="s-num">01</span>
+  </div>
+
+  <div class="s1-main">
+    <h1 class="s1-title sa-left">Lernmaterial<br><span class="s1-title-red">verwaltung</span></h1>
+    <div class="s1-rule sa3"></div>
+    <p class="s1-sub sa4">Zentrales Materialmanagementsystem<br>auf Python &amp; MySQL-Basis</p>
+  </div>
+
+  <div class="s1-aside sa2">
+    <div class="s1-aside-item">
+      <span class="s1-aside-label">Lernfeld</span>
+      <span class="s1-aside-value">LF 8</span>
+    </div>
+    <div class="s1-aside-item">
+      <span class="s1-aside-label">Zeitraum</span>
+      <span class="s1-aside-value">Apr – Mai 2026</span>
+    </div>
+    <div class="s1-aside-item">
+      <span class="s1-aside-label">Gesamtaufwand</span>
+      <span class="s1-aside-value">43 Stunden</span>
+    </div>
+    <div class="s1-aside-item">
+      <span class="s1-aside-label">Stack</span>
+      <span class="s1-aside-value">Python · SQLAlchemy · MySQL</span>
+    </div>
+  </div>
+
+  <div class="s1-footer sa5">
+    <span class="s1-meta">Auric Ergeson &nbsp;·&nbsp; Azubi Anwendungsentwickler &nbsp;·&nbsp; Mai 2026</span>
+    <span class="s1-badge">Berufsschule</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 2 — AGENDA                                             -->
+<!-- ============================================================ -->
+<!-- NOTES: Kurzer Überblick über die Struktur. 30 s -->
+<section class="slide" data-slide="2">
+  <div class="s-stripe"></div>
+  <div class="s-grid-v" style="left:840px"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Überblick</span>
+    <span class="s-num">02</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Agenda</h2>
+    <div class="s2-items sa3">
+      <div class="s2-item">
+        <span class="s2-item-num">01</span>
+        <span class="s2-item-text">Ausgangssituation</span>
+      </div>
+      <div class="s2-item">
+        <span class="s2-item-num">06</span>
+        <span class="s2-item-text">Systemarchitektur &amp; Funktionen</span>
+      </div>
+      <div class="s2-item">
+        <span class="s2-item-num">02</span>
+        <span class="s2-item-text">Aufgabenstellung &amp; Zielsetzung</span>
+      </div>
+      <div class="s2-item">
+        <span class="s2-item-num">07</span>
+        <span class="s2-item-text">Herausforderungen &amp; Lösungen</span>
+      </div>
+      <div class="s2-item">
+        <span class="s2-item-num">03</span>
+        <span class="s2-item-text">Projektplanung &amp; Prozessschritte</span>
+      </div>
+      <div class="s2-item">
+        <span class="s2-item-num">08</span>
+        <span class="s2-item-text">Soll-Ist-Vergleich</span>
+      </div>
+      <div class="s2-item">
+        <span class="s2-item-num">04</span>
+        <span class="s2-item-text">Lösungskonzept &amp; Entscheidungen</span>
+      </div>
+      <div class="s2-item">
+        <span class="s2-item-num">09</span>
+        <span class="s2-item-text">Ergebnis</span>
+      </div>
+      <div class="s2-item">
+        <span class="s2-item-num">05</span>
+        <span class="s2-item-text">Datenbankdesign</span>
+      </div>
+      <div class="s2-item">
+        <span class="s2-item-num">10</span>
+        <span class="s2-item-text">Fazit &amp; Reflexion</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer sa4">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">02 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 3 — AUSGANGSSITUATION                                  -->
+<!-- ============================================================ -->
+<!-- NOTES: Geschichte erzählen. Problem aus Lehrerperspektive schildern. ~90 s -->
+<section class="slide" data-slide="3">
+  <div class="s-stripe"></div>
+  <div class="s-grid-v" style="left:840px"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Ausgangssituation &nbsp;·&nbsp; Problemstellung</span>
+    <span class="s-num">03</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Ausgangssituation</h2>
+    <blockquote class="s3-quote sa3">
+      „Unterrichtsmaterialien werden per E-Mail verteilt, auf verschiedenen Computern abgelegt —<br>ohne zentrale Verwaltung, ohne Suche, ohne Versionierung."
+    </blockquote>
+    <div class="s3-cards">
+      <div class="s3-card sa4">
+        <div class="s3-card-title">Dezentrale Ablage</div>
+        <div class="s3-card-text">Jede Lehrkraft verwendet eine eigene Ordnerstruktur — kein einheitliches System.</div>
+      </div>
+      <div class="s3-card sa5">
+        <div class="s3-card-title">Keine Suchfunktion</div>
+        <div class="s3-card-text">Materialien sind schwer auffindbar. Nur wer den genauen Dateinamen kennt, findet die Datei.</div>
+      </div>
+      <div class="s3-card sa6">
+        <div class="s3-card-title">Versionschaos</div>
+        <div class="s3-card-text">Überarbeitungen werden nicht nachverfolgt — veraltete Versionen zirkulieren weiter.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer sa7">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">03 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 4 — AUFGABENSTELLUNG & ZIELSETZUNG                     -->
+<!-- ============================================================ -->
+<!-- NOTES: Was war die konkrete Aufgabe? Ziele nennen. Grenzen abstecken. ~60 s -->
+<section class="slide" data-slide="4">
+  <div class="s-stripe"></div>
+  <div class="s-grid-v" style="left:840px"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Aufgabenstellung &amp; Zielsetzung</span>
+    <span class="s-num">04</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Aufgabenstellung &amp; <span class="s-title-accent">Zielsetzung</span></h2>
+    <div class="s4-grid">
+      <div>
+        <div class="s4-col-title sa3">Funktionale Ziele</div>
+        <div class="s4-goal-item sa4">
+          <span class="s4-check">✓</span>
+          <span class="s4-goal-text">Materialien hochladen, herunterladen &amp; durchsuchen</span>
+        </div>
+        <div class="s4-goal-item sa4" style="animation-delay:0.4s">
+          <span class="s4-check">✓</span>
+          <span class="s4-goal-text">Kommentarfunktion für Lehrkräfte &amp; Azubis</span>
+        </div>
+        <div class="s4-goal-item sa5">
+          <span class="s4-check">✓</span>
+          <span class="s4-goal-text">Benutzerverwaltung mit Rollen (Lehrer, Azubi, Admin)</span>
+        </div>
+        <div class="s4-goal-item sa5" style="animation-delay:0.5s">
+          <span class="s4-check">✓</span>
+          <span class="s4-goal-text">7 SQL-Abfragen mit Aggregation, JOINs &amp; Filtern</span>
+        </div>
+        <div class="s4-goal-item sa6">
+          <span class="s4-check">✓</span>
+          <span class="s4-goal-text">Strukturierte Ausgabe über CLI mit <em>rich</em>-Bibliothek</span>
+        </div>
+      </div>
+      <div>
+        <div class="s4-col-title sa3">Nicht im Scope</div>
+        <div class="s4-scope-box sa4">
+          <div class="s4-scope-title">Bewusst ausgegrenzt</div>
+          <div class="s4-scope-item">
+            <span class="s4-cross">×</span>
+            <span class="s4-scope-text">Web-Oberfläche — außerhalb des LF8-Rahmens, erfordert eigenes Lernfeld</span>
+          </div>
+          <div class="s4-scope-item">
+            <span class="s4-cross">×</span>
+            <span class="s4-scope-text">Echtzeitsynchronisation zwischen Clients</span>
+          </div>
+          <div class="s4-scope-item">
+            <span class="s4-cross">×</span>
+            <span class="s4-scope-text">Automatische Datensicherung / Backup-System</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer sa7">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">04 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 5 — PROJEKTPLANUNG & PROZESSSCHRITTE                   -->
+<!-- ============================================================ -->
+<!-- NOTES: 5 Phasen zeigen. DB-first Begründung erläutern. ~90 s -->
+<section class="slide" data-slide="5">
+  <div class="s-stripe"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Projektplanung &amp; Prozessschritte</span>
+    <span class="s-num">05</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Projektplanung</h2>
+    <div class="s5-flow sa3">
+      <div class="s5-box">
+        <span class="s5-box-num">Phase 01</span>
+        <span class="s5-box-name">Analyse &amp; Planung</span>
+        <span class="s5-box-hours">4 h (geplant)</span>
+      </div>
+      <div class="s5-arrow">→</div>
+      <div class="s5-box" style="border-left:5px solid var(--red);">
+        <span class="s5-box-num">Phase 02</span>
+        <span class="s5-box-name">Datenbankdesign</span>
+        <span class="s5-box-hours">6 h (geplant)</span>
+      </div>
+      <div class="s5-arrow">→</div>
+      <div class="s5-box">
+        <span class="s5-box-num">Phase 03</span>
+        <span class="s5-box-name">Implementierung</span>
+        <span class="s5-box-hours">15 h (geplant)</span>
+      </div>
+      <div class="s5-arrow">→</div>
+      <div class="s5-box">
+        <span class="s5-box-num">Phase 04</span>
+        <span class="s5-box-name">Test &amp; Debugging</span>
+        <span class="s5-box-hours">4 h (geplant)</span>
+      </div>
+      <div class="s5-arrow">→</div>
+      <div class="s5-box">
+        <span class="s5-box-num">Phase 05</span>
+        <span class="s5-box-name">Dokumentation</span>
+        <span class="s5-box-hours">6 h (geplant)</span>
+      </div>
+    </div>
+
+    <div style="margin-top:48px;">
+      <div class="s5-rationale sa4">
+        <div class="s5-rationale-label">Warum DB-first?</div>
+        <div class="s5-rationale-text">Datenbankdesign vor Implementierung abgeschlossen — Schema-first verhindert späteren Refactoring-Aufwand.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px; display:flex; gap:32px;">
+      <div style="background:var(--gray-ultra); padding:16px 24px; border:1px solid var(--gray-light);" class="sa5">
+        <span style="font-family:var(--font-mono);font-size:14px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray-mid);">Projektstart</span>
+        <div style="font-family:var(--font-body);font-size:24px;font-weight:600;color:var(--black);margin-top:6px;">06. April 2026</div>
+      </div>
+      <div style="background:var(--gray-ultra); padding:16px 24px; border:1px solid var(--gray-light);" class="sa5" style="animation-delay:0.5s">
+        <span style="font-family:var(--font-mono);font-size:14px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray-mid);">Abgabe</span>
+        <div style="font-family:var(--font-body);font-size:24px;font-weight:600;color:var(--black);margin-top:6px;">16. Mai 2026</div>
+      </div>
+      <div style="background:var(--gray-ultra); padding:16px 24px; border:1px solid var(--gray-light);" class="sa5" style="animation-delay:0.55s">
+        <span style="font-family:var(--font-mono);font-size:14px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray-mid);">Gesamtplanung</span>
+        <div style="font-family:var(--font-body);font-size:24px;font-weight:600;color:var(--red);margin-top:6px;">35 Stunden</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer sa6">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">05 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 6 — LÖSUNGSKONZEPT & ENTSCHEIDUNGEN                    -->
+<!-- ============================================================ -->
+<!-- NOTES: Alternativen zeigen, Entscheidung begründen. ~90 s -->
+<section class="slide" data-slide="6">
+  <div class="s-stripe"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Lösungskonzept &amp; Entscheidungen</span>
+    <span class="s-num">06</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Lösungskonzept &amp; <span class="s-title-accent">Entscheidungen</span></h2>
+    <div class="sa3">
+      <table class="s6-table">
+        <thead>
+          <tr>
+            <th style="width:280px">Ansatz</th>
+            <th>Versionierung</th>
+            <th>Suchfunktion</th>
+            <th>Datenbankanbindung</th>
+            <th>Zeitaufwand</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="sa4">
+            <td>Freigegebener Ordner</td>
+            <td><span class="s6-icon">✗</span></td>
+            <td><span class="s6-icon">✗</span></td>
+            <td><span class="s6-icon">✗</span></td>
+            <td>Gering</td>
+          </tr>
+          <tr class="sa4" style="animation-delay:0.4s">
+            <td>Excel-Tabelle</td>
+            <td><span class="s6-icon">✗</span></td>
+            <td><span class="s6-icon">~</span></td>
+            <td><span class="s6-icon">✗</span></td>
+            <td>Mittel</td>
+          </tr>
+          <tr class="sa5">
+            <td>Web-Anwendung</td>
+            <td><span class="s6-icon">✓</span></td>
+            <td><span class="s6-icon">✓</span></td>
+            <td><span class="s6-icon">✓</span></td>
+            <td style="color:var(--red)">Sehr hoch — außerhalb LF8</td>
+          </tr>
+          <tr class="s6-chosen sa6">
+            <td>CLI + Python + MySQL ★</td>
+            <td><span class="s6-icon">✓</span></td>
+            <td><span class="s6-icon">✓</span></td>
+            <td><span class="s6-icon">✓</span></td>
+            <td>Mittel — LF8-konform</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:36px; padding:20px 24px; background:var(--gray-ultra); border-left:5px solid var(--red);" class="sa7">
+      <span style="font-family:var(--font-body);font-size:26px;font-weight:500;color:var(--gray-dark);line-height:1.45;">
+        <strong style="color:var(--black)">Entscheidung:</strong> CLI-Anwendung mit Python, SQLAlchemy & MySQL — Datenbanklogik-fokussiert, LF8-konform, im Zeitrahmen umsetzbar.
+      </span>
+    </div>
+  </div>
+
+  <div class="s-footer sa7" style="animation-delay:0.7s">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">06 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 7 — DATENBANKDESIGN                                    -->
+<!-- ============================================================ -->
+<!-- NOTES: ERD erklären. Designentscheidungen begründen. ~90 s -->
+<section class="slide" data-slide="7">
+  <div class="s-stripe"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Datenbankdesign &amp; Datenmodell</span>
+    <span class="s-num">07</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Datenbankdesign</h2>
+    <div class="s7-grid">
+      <div class="s7-decisions">
+        <div class="s7-decision sa3">
+          <div class="s7-dec-title">8 Tabellen in 3. Normalform</div>
+          <div class="s7-dec-text">benutzer · themengebiet · kategorie · tag · material · kommentar · material_tag · version</div>
+        </div>
+        <div class="s7-decision sa4">
+          <div class="s7-dec-title">Tags in eigener Tabelle (1NF)</div>
+          <div class="s7-dec-text">Statt kommaseparierter Werte — korrekte Normalisierung verhindert Anomalien bei Änderungen.</div>
+          <span class="s7-dec-code">material_tag (N:M-Beziehung)</span>
+        </div>
+        <div class="s7-decision sa5">
+          <div class="s7-dec-title">Dualer Dateispeicher</div>
+          <div class="s7-dec-text">
+            Dateien <strong>&lt; 1 MB</strong> → LONGBLOB in MySQL-Datenbank<br>
+            Dateien <strong>≥ 1 MB</strong> → Dateisystem (app/uploads/)
+          </div>
+          <span class="s7-dec-code">is_in_database (BOOLEAN Flag)</span>
+        </div>
+        <div class="s7-decision sa6">
+          <div class="s7-dec-title">Trigger für Versionierung</div>
+          <div class="s7-dec-text">MySQL-Trigger erstellt bei jeder Änderung automatisch einen Eintrag in der <em>version</em>-Tabelle.</div>
+        </div>
+      </div>
+      <div class="s7-erd sa3" style="animation-delay:0.3s">
+        <img src="lernmaterialverwaltung.png" alt="Entity-Relationship-Diagramm der Datenbank">
+        <div class="s7-erd-caption">ERD · Erstellt mit DBeaver</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer sa7">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">07 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 8 — SYSTEMARCHITEKTUR & FUNKTIONEN                     -->
+<!-- ============================================================ -->
+<!-- NOTES: 3-Schichten-Architektur erläutern. 8 Funktionen + SQL-Typen nennen. ~90 s -->
+<section class="slide" data-slide="8">
+  <div class="s-stripe"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Systemarchitektur &amp; Funktionsumfang</span>
+    <span class="s-num">08</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Systemarchitektur &amp; <span class="s-title-accent">Funktionen</span></h2>
+    <div class="s8-grid">
+      <!-- Architecture layers -->
+      <div class="s8-arch sa3">
+        <div class="s8-layer s8-layer--top">
+          <div>
+            <div class="s8-layer-label">main.py</div>
+            <div class="s8-layer-desc">CLI-Oberfläche &amp; Benutzerinteraktion</div>
+          </div>
+          <div class="s8-layer-tech">rich 15.0</div>
+        </div>
+        <div class="s8-connector">↓</div>
+        <div class="s8-layer s8-layer--mid">
+          <div>
+            <div class="s8-layer-label">services.py</div>
+            <div class="s8-layer-desc">Geschäftslogik, CRUD, SQL-Abfragen</div>
+          </div>
+          <div class="s8-layer-tech">SQLAlchemy 2.0</div>
+        </div>
+        <div class="s8-connector">↓</div>
+        <div class="s8-layer s8-layer--bot">
+          <div>
+            <div class="s8-layer-label">database.py</div>
+            <div class="s8-layer-desc">Verbindungsmanagement &amp; ORM</div>
+          </div>
+          <div class="s8-layer-tech">PyMySQL<br>MySQL 8</div>
+        </div>
+
+        <div style="margin-top:24px; padding:16px 20px; background:var(--gray-ultra); border:1px solid var(--gray-light);">
+          <div style="font-family:var(--font-mono);font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray-mid);margin-bottom:8px;">7 SQL-Abfragen</div>
+          <div style="font-family:var(--font-body);font-size:20px;font-weight:500;color:var(--gray-dark);line-height:1.5;">
+            COUNT · AVG · INNER JOIN · Multi-JOIN<br>JOIN + COUNT · Volltextsuche mit WHERE
+          </div>
+        </div>
+      </div>
+
+      <!-- 8 Functions -->
+      <div class="s8-fns sa4">
+        <div class="s8-fn">
+          <span class="s8-fn-num">01</span>
+          <span class="s8-fn-name">Material hochladen</span>
+        </div>
+        <div class="s8-fn">
+          <span class="s8-fn-num">02</span>
+          <span class="s8-fn-name">Material herunterladen</span>
+        </div>
+        <div class="s8-fn">
+          <span class="s8-fn-num">03</span>
+          <span class="s8-fn-name">Suche &amp; Filter</span>
+        </div>
+        <div class="s8-fn">
+          <span class="s8-fn-num">04</span>
+          <span class="s8-fn-name">Material löschen</span>
+        </div>
+        <div class="s8-fn">
+          <span class="s8-fn-num">05</span>
+          <span class="s8-fn-name">Kommentare verwalten</span>
+        </div>
+        <div class="s8-fn">
+          <span class="s8-fn-num">06</span>
+          <span class="s8-fn-name">Listen &amp; Übersichten</span>
+        </div>
+        <div class="s8-fn">
+          <span class="s8-fn-num">07</span>
+          <span class="s8-fn-name">SQL-Abfragen ausführen</span>
+        </div>
+        <div class="s8-fn">
+          <span class="s8-fn-num">08</span>
+          <span class="s8-fn-name">Einträge erstellen</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer sa7">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">08 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 9 — HERAUSFORDERUNGEN & LÖSUNGEN                       -->
+<!-- ============================================================ -->
+<!-- NOTES: Ehrlich über Schwierigkeiten sprechen. Als Lernmomente framen. ~60 s -->
+<section class="slide" data-slide="9">
+  <div class="s-stripe"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Herausforderungen &amp; Lösungsansätze</span>
+    <span class="s-num">09</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Herausforderungen &amp; <span class="s-title-accent">Lösungen</span></h2>
+    <div class="s9-grid">
+      <div class="s9-card sa3">
+        <div class="s9-card-header">
+          <div class="s9-card-num">Herausforderung 01</div>
+          <div class="s9-card-title">SQLAlchemy Automap</div>
+        </div>
+        <div class="s9-section">
+          <div class="s9-section-label s9-section-label--prob">Problem</div>
+          <div class="s9-section-text">Die automatische Tabellenerkennung mit <code style="font-family:var(--font-mono);background:var(--red-light);padding:2px 6px;">automap_base()</code> erkannte Fremdschlüsselbeziehungen zwischen den Tabellen nicht korrekt — führte zu Laufzeitfehlern bei JOINs.</div>
+        </div>
+        <div class="s9-section">
+          <div class="s9-section-label s9-section-label--sol">Lösung</div>
+          <div class="s9-section-text">Manuelle Definition der Beziehungen mit <code style="font-family:var(--font-mono);background:var(--gray-ultra);padding:2px 6px;">relationship()</code> und expliziten <code style="font-family:var(--font-mono);background:var(--gray-ultra);padding:2px 6px;">foreign_keys=[]</code>-Parametern. Dokumentation vertieft studiert.</div>
+        </div>
+      </div>
+
+      <div class="s9-card sa4">
+        <div class="s9-card-header">
+          <div class="s9-card-num">Herausforderung 02</div>
+          <div class="s9-card-title">Datei-Upload Kodierung</div>
+        </div>
+        <div class="s9-section">
+          <div class="s9-section-label s9-section-label--prob">Problem</div>
+          <div class="s9-section-text">Beim Einlesen von Binärdateien (z. B. PDF, DOCX) trat ein <code style="font-family:var(--font-mono);background:var(--red-light);padding:2px 6px;">UnicodeDecodeError</code> auf, weil Dateien im Textmodus geöffnet wurden.</div>
+        </div>
+        <div class="s9-section">
+          <div class="s9-section-label s9-section-label--sol">Lösung</div>
+          <div class="s9-section-text">Konsequenter Wechsel zum Binärmodus: <code style="font-family:var(--font-mono);background:var(--gray-ultra);padding:2px 6px;">open(path, 'rb')</code> für alle Dateioperationen. Gilt für Upload und Download.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer sa5">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">09 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 10 — SOLL-IST-VERGLEICH                                -->
+<!-- ============================================================ -->
+<!-- NOTES: Zahlen ehrlich präsentieren. Mehraufwand begründen. ~60 s -->
+<section class="slide" data-slide="10">
+  <div class="s-stripe"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Projektverlauf &amp; Zeitauswertung</span>
+    <span class="s-num">10</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Soll-Ist-<span class="s-title-accent">Vergleich</span></h2>
+    <div class="s10-grid">
+      <!-- Table -->
+      <div class="sa3">
+        <table class="s10-table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Soll</th>
+              <th>Ist</th>
+              <th>Δ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Analyse &amp; Planung</td>
+              <td>4 h</td>
+              <td class="s10-actual">5 h</td>
+              <td class="s10-delta">+1 h</td>
+            </tr>
+            <tr>
+              <td>Datenbankdesign</td>
+              <td>6 h</td>
+              <td class="s10-actual">8 h</td>
+              <td class="s10-delta">+2 h</td>
+            </tr>
+            <tr>
+              <td>Implementierung</td>
+              <td>15 h</td>
+              <td class="s10-actual">18 h</td>
+              <td class="s10-delta">+3 h</td>
+            </tr>
+            <tr>
+              <td>Test &amp; Debugging</td>
+              <td>4 h</td>
+              <td class="s10-actual">5 h</td>
+              <td class="s10-delta">+1 h</td>
+            </tr>
+            <tr>
+              <td>Dokumentation</td>
+              <td>6 h</td>
+              <td class="s10-actual">7 h</td>
+              <td class="s10-delta">+1 h</td>
+            </tr>
+            <tr class="s10-total">
+              <td>Gesamt</td>
+              <td>35 h</td>
+              <td class="s10-actual">43 h</td>
+              <td class="s10-delta">+8 h</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Right: visual summary -->
+      <div class="s10-right sa4">
+        <div>
+          <div class="s10-big-label">Zeitplanung</div>
+          <div class="s10-big">
+            <span class="s10-big-num s10-big-num--plan">35</span>
+            <span class="s10-big-arrow">→</span>
+            <span class="s10-big-num s10-big-num--act">43</span>
+            <span style="font-family:var(--font-body);font-size:32px;color:var(--gray-mid);align-self:flex-end;padding-bottom:12px;"> Stunden</span>
+          </div>
+        </div>
+        <div>
+          <div class="s10-pct">+23 %</div>
+          <div class="s10-pct-label">Mehraufwand gegenüber Planung</div>
+        </div>
+        <div class="s10-why">
+          <div class="s10-why-label">Hauptursachen</div>
+          <div class="s10-why-text">SQLAlchemy-Lernkurve (automap, relationships) &amp; erhöhter Debugging-Aufwand beim Datei-Upload haben die Implementierungsphase um 3 Stunden verlängert.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer sa5">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">10 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 11 — ERGEBNIS                                          -->
+<!-- ============================================================ -->
+<!-- NOTES: System ist fertig und funktionsfähig. Kurze Demo wenn möglich. ~60 s -->
+<section class="slide" data-slide="11">
+  <div class="s-stripe"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Projektergebnis &amp; Produktvorstellung</span>
+    <span class="s-num">11</span>
+  </div>
+
+  <div class="s-body">
+    <h2 class="s-title sa2">Ergebnis</h2>
+    <div class="s11-metrics sa3">
+      <div class="s11-metric">
+        <div class="s11-metric-num">8</div>
+        <div class="s11-metric-label">Funktionen implementiert</div>
+        <div class="s11-metric-sub">Upload · Download · Suche · Löschen · Kommentare · Listen · SQL · Erstellen</div>
+      </div>
+      <div class="s11-metric">
+        <div class="s11-metric-num">7</div>
+        <div class="s11-metric-label">SQL-Abfragetypen</div>
+        <div class="s11-metric-sub">COUNT · AVG · INNER JOIN · Multi-JOIN · JOIN+COUNT · Volltextsuche</div>
+      </div>
+      <div class="s11-metric">
+        <div class="s11-metric-num">8</div>
+        <div class="s11-metric-label">Datenbanktabellen</div>
+        <div class="s11-metric-sub">3. Normalform · Trigger · N:M-Beziehungen · Dual-Storage-Strategie</div>
+      </div>
+    </div>
+
+    <!-- Terminal mockup -->
+    <div class="s11-terminal sa4">
+      <div class="s11-term-bar">
+        <div class="s11-term-dot" style="background:#FF5F56"></div>
+        <div class="s11-term-dot" style="background:#FFBD2E"></div>
+        <div class="s11-term-dot" style="background:#27C93F"></div>
+        <span style="font-family:'Courier Prime',monospace;font-size:16px;color:#8b949e;margin-left:12px;">python app/main.py — Lernmaterialverwaltung</span>
+      </div>
+      <div class="s11-term-body">
+        <div class="s11-term-line"><span class="t-border">┌────┬────────────────────────────┬──────────────────┬────────────┬───────────┐</span></div>
+        <div class="s11-term-line"><span class="t-border">│</span> <span class="t-dim">ID</span> <span class="t-border">│</span> <span class="t-dim">Titel                      </span> <span class="t-border">│</span> <span class="t-dim">Fach             </span> <span class="t-border">│</span> <span class="t-dim">Kategorie  </span> <span class="t-border">│</span> <span class="t-dim">Größe     </span> <span class="t-border">│</span></div>
+        <div class="s11-term-line"><span class="t-border">├────┼────────────────────────────┼──────────────────┼────────────┼───────────┤</span></div>
+        <div class="s11-term-line"><span class="t-border">│</span> <span class="t-id"> 1 </span> <span class="t-border">│</span> <span class="t-title"> Python Grundlagen          </span> <span class="t-border">│</span> <span class="t-subject"> Programmierung   </span> <span class="t-border">│</span> <span class="t-dim"> Skript    </span> <span class="t-border">│</span> <span class="t-size"> 285 KB   </span> <span class="t-border">│</span></div>
+        <div class="s11-term-line"><span class="t-border">│</span> <span class="t-id"> 2 </span> <span class="t-border">│</span> <span class="t-title"> SQL-Abfragen erklärt       </span> <span class="t-border">│</span> <span class="t-subject"> Datenbanken      </span> <span class="t-border">│</span> <span class="t-dim"> Übung     </span> <span class="t-border">│</span> <span class="t-size"> 1.2 MB   </span> <span class="t-border">│</span></div>
+        <div class="s11-term-line"><span class="t-border">│</span> <span class="t-id"> 3 </span> <span class="t-border">│</span> <span class="t-title"> Netzwerkprotokolle OSI     </span> <span class="t-border">│</span> <span class="t-subject"> Netzwerke        </span> <span class="t-border">│</span> <span class="t-dim"> Folie     </span> <span class="t-border">│</span> <span class="t-size"> 450 KB   </span> <span class="t-border">│</span></div>
+        <div class="s11-term-line"><span class="t-border">└────┴────────────────────────────┴──────────────────┴────────────┴───────────┘</span></div>
+        <div class="s11-term-line" style="margin-top:4px;"><span class="t-prompt">▶</span> <span style="color:#e6edf3;">3 Materialien gefunden · Datenbankverbindung aktiv · MySQL 8.0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer sa5">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8</span>
+    <span class="s-footer-prog">11 / 12</span>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 12 — FAZIT & REFLEXION                                 -->
+<!-- ============================================================ -->
+<!-- NOTES: Ehrliche Reflexion. Persönliches Fazit. Fragen einladen. ~90 s -->
+<section class="slide" data-slide="12">
+  <div class="s-stripe"></div>
+
+  <div class="s-header sa1">
+    <span class="s-eyebrow">Fazit &amp; Persönliche Reflexion</span>
+    <span class="s-num">12</span>
+  </div>
+
+  <div class="s-body" style="bottom:110px;">
+    <h2 class="s-title sa2">Fazit &amp; <span class="s-title-accent">Reflexion</span></h2>
+    <div class="s12-grid" style="height:auto;">
+      <div>
+        <div class="s12-col-title sa3">Was hat funktioniert</div>
+        <div class="s12-item sa4">
+          <span class="s12-icon">✓</span>
+          <span class="s12-item-text"><strong>DB-first Ansatz</strong> — Klares Schema vor der Implementierung hat Refactoring verhindert</span>
+        </div>
+        <div class="s12-item sa5">
+          <span class="s12-icon">✓</span>
+          <span class="s12-item-text"><strong>Drei-Schichten-Architektur</strong> — Saubere Trennung macht Änderungen lokal und beherrschbar</span>
+        </div>
+        <div class="s12-item sa6">
+          <span class="s12-icon">✓</span>
+          <span class="s12-item-text"><strong>rich-Bibliothek</strong> — Übersichtliche, professionelle CLI-Ausgabe ohne großen Aufwand</span>
+        </div>
+      </div>
+      <div>
+        <div class="s12-col-title sa3">Was ich ändern würde</div>
+        <div class="s12-item sa4">
+          <span class="s12-icon">→</span>
+          <span class="s12-item-text">SQLAlchemy-Dokumentation <strong>früher</strong> und gezielter studieren — hätte 3 Stunden Debugging gespart</span>
+        </div>
+        <div class="s12-item sa5">
+          <span class="s12-icon">→</span>
+          <span class="s12-item-text">Zeitpuffer für unbekannte Technologien <strong>direkt in die Planung</strong> einkalkulieren</span>
+        </div>
+        <div class="s12-item sa6">
+          <span class="s12-icon">→</span>
+          <span class="s12-item-text">Als nächsten Schritt eine <strong>Web-Oberfläche</strong> ergänzen — für bessere Zugänglichkeit ohne CLI</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:36px; border-top:3px solid var(--red); padding-top:28px;" class="sa7">
+      <p style="font-family:var(--font-body);font-style:italic;font-size:32px;font-weight:600;color:var(--gray-dark);line-height:1.45;max-width:1500px;">
+        „Strukturierte Datenbankplanung reduziert den Implementierungsaufwand — Zeitplanung mit unbekannten Technologien muss realistischer sein."
+      </p>
+    </div>
+  </div>
+
+  <div class="s-footer sa7" style="animation-delay:0.75s">
+    <span class="s-footer-meta">Auric Ergeson · Lernmaterialverwaltung · LF8 · Mai 2026</span>
+    <span style="font-family:var(--font-mono);font-size:16px;color:var(--red);letter-spacing:0.1em;">Vielen Dank — Fragen?</span>
+  </div>
+</section>
+
+</main>
+</div>
+
+<!-- Navigation -->
+<nav class="deck-controls">
+  <button class="nav-btn" id="prevBtn">&#8592;</button>
+  <span class="nav-counter" id="slideCounter">1 / 12</span>
+  <button class="nav-btn" id="nextBtn">&#8594;</button>
+</nav>
+
+<script>
+/* === STAGE SCALING === */
+const stage = document.getElementById('deckStage');
+function fitStage() {
+  const sc = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  const tx = (window.innerWidth  - 1920 * sc) / 2;
+  const ty = (window.innerHeight - 1080 * sc) / 2;
+  stage.style.transform = `translate(${tx}px,${ty}px) scale(${sc})`;
+}
+fitStage();
+window.addEventListener('resize', fitStage);
+
+/* === SLIDE CONTROLLER === */
+const slides = Array.from(document.querySelectorAll('.slide'));
+let current = 0;
+
+function showSlide(idx) {
+  idx = Math.max(0, Math.min(idx, slides.length - 1));
+  slides.forEach((s, i) => {
+    s.classList.remove('active');
+  });
+  /* Force reflow on target to restart CSS animations */
+  void slides[idx].offsetHeight;
+  slides[idx].classList.add('active');
+  current = idx;
+  document.getElementById('slideCounter').textContent = `${idx + 1} / ${slides.length}`;
+}
+
+/* Keyboard navigation */
+document.addEventListener('keydown', e => {
+  if (e.target.getAttribute('contenteditable')) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ')  { e.preventDefault(); showSlide(current + 1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); showSlide(current - 1); }
+  if (e.key === 'Home') showSlide(0);
+  if (e.key === 'End')  showSlide(slides.length - 1);
+  if (e.key === 'e' || e.key === 'E') toggleEdit();
+});
+
+/* Button navigation */
+document.getElementById('prevBtn').addEventListener('click', () => showSlide(current - 1));
+document.getElementById('nextBtn').addEventListener('click', () => showSlide(current + 1));
+
+/* Touch/swipe */
+let touchStartX = 0;
+stage.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+stage.addEventListener('touchend',   e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) showSlide(current + (dx < 0 ? 1 : -1));
+});
+
+/* Mouse wheel */
+let wheelCooldown = false;
+document.addEventListener('wheel', e => {
+  if (wheelCooldown) return;
+  wheelCooldown = true;
+  showSlide(current + (e.deltaY > 0 ? 1 : -1));
+  setTimeout(() => { wheelCooldown = false; }, 600);
+}, { passive: true });
+
+/* Initialize */
+showSlide(0);
+
+/* === INLINE EDITOR === */
+let editActive = false;
+const editToggle = document.getElementById('editToggle');
+const hotzone    = document.querySelector('.edit-hotzone');
+let hideTimer    = null;
+
+function toggleEdit() {
+  editActive = !editActive;
+  editToggle.classList.toggle('active', editActive);
+  document.querySelectorAll('.slide [class]').forEach(el => {
+    if (!el.querySelector('[contenteditable]') && el.children.length === 0) {
+      el.setAttribute('contenteditable', editActive ? 'true' : 'false');
+    }
+  });
+  /* Make leaf text nodes editable */
+  slides.forEach(sl => {
+    sl.querySelectorAll('h1,h2,h3,p,span,div,blockquote').forEach(el => {
+      if (el.children.length === 0 || el.querySelector('span,em,strong,code')) {
+        el.setAttribute('contenteditable', editActive ? 'true' : 'false');
+      }
+    });
+  });
+  if (editActive) {
+    editToggle.title = 'Bearbeitung beenden (E)';
+  } else {
+    editToggle.title = 'Bearbeiten (E)';
+    /* Save to localStorage */
+    localStorage.setItem('lmv-pres-html', stage.innerHTML);
+  }
+}
+
+hotzone.addEventListener('mouseenter', () => {
+  clearTimeout(hideTimer);
+  editToggle.classList.add('show');
+});
+hotzone.addEventListener('mouseleave', () => {
+  hideTimer = setTimeout(() => { if (!editActive) editToggle.classList.remove('show'); }, 400);
+});
+editToggle.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+editToggle.addEventListener('mouseleave', () => {
+  hideTimer = setTimeout(() => { if (!editActive) editToggle.classList.remove('show'); }, 400);
+});
+hotzone.addEventListener('click', toggleEdit);
+editToggle.addEventListener('click', toggleEdit);
+
+/* Restore saved edits */
+const saved = localStorage.getItem('lmv-pres-html');
+if (saved) stage.innerHTML = saved;
+
+/* Re-init slides after potential restore */
+setTimeout(() => showSlide(0), 50);
+</script>
+</body>
+</html>

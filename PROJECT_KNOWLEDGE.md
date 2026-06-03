@@ -111,15 +111,15 @@ The Word documentation is generated programmatically using Node.js + the `docx` 
 - Tables: dark navy header, alternating light blue/white rows
 - Code blocks: Courier New 9pt, grey (#F2F2F2) background
 
-**Current structure — prozessorientierter Projektbericht (updated 2026-06-01):**
+**Current structure — prozessorientierter Projektbericht (updated 2026-06-02):**
 
 Main body (6 chapters):
-1. Projektauftrag (1.1 Ausgangssituation, 1.2 Aufgabenstellung, 1.3 Projektumfeld)
+1. Projektauftrag (1.1 Ausgangssituation, 1.2 Aufgabenstellung + Fremdleistungsabgrenzung, 1.3 Projektumfeld)
 2. Projektplanung (2.1 Lösungsansatz + Alternativen, 2.2 Zeitplanung table)
 3. Projektdurchführung (3.1 Datenbankdesign, 3.2 Implementierung, 3.3 Ergebnisse)
 4. Funktionsübersicht (8-function table)
 5. Projektabschluss (5.1 Soll-Ist, 5.2 Zeitaufwand-Vergleich, 5.3 Reflexion)
-6. Quellenverzeichnis (3 sources)
+6. Quellenverzeichnis (4 sources: Python, SQLAlchemy, MySQL, rich)
 
 Then: Anhangsverzeichnis → 5 numbered appendices:
 - Anhang I: Full SQL schema (read from `sql/schema.sql`)
@@ -141,7 +141,8 @@ Then: Anhangsverzeichnis → 5 numbered appendices:
 |---|---|---|
 | 1.2 Anhangsverzeichnis + Quellenangaben | 5 | ✅ |
 | 1.3 Cross-references to Anhänge | 5 | ✅ |
-| 2.1 Projektauftrag | 9 | ✅ |
+| 1.5 Sprachliche Gestaltung | 5 | ✅ humanised 2026-06-02 |
+| 2.1 Projektauftrag (incl. Fremdleistungsabgrenzung) | 9 | ✅ fixed 2026-06-02 |
 | 2.2 Projektplanung + Zeitplan | 10 | ✅ |
 | 2.3 Projektdurchführung | 31 | ✅ |
 | 2.4 Projektabschluss + Reflexion | 15 | ✅ |

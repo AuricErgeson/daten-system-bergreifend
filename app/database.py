@@ -8,8 +8,8 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import os
 
-# .env Datei laden – dort stehen Passwort und Datenbankname
-load_dotenv(dotenv_path=r'C:\Users\auric\Desktop\Auric\Learning Stuff\Python\daten-system-bergreifend\.env')
+# .env Datei laden – liegt im Projektordner (eine Ebene über app/)
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # Verbindungsadresse für die Datenbank zusammenbauen
 mysql_url = URL.create(

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Style B — Signal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* === VIEWPORT BASE === */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #1C2644); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } }
+
+/* === SIGNAL STYLE === */
+:root {
+  --navy: #1C2644;
+  --navy-alt: #232F55;
+  --cream: #F0ECE3;
+  --cream-alt: #E6E0D4;
+  --gold: #C8A870;
+  --gold-dim: #A8885A;
+  --text-warm: #E2DCD0;
+  --text-muted: #8A96A8;
+  --text-hint: #4E5A6E;
+  --ink: #1A2030;
+  --stage-bg: #0D1628;
+  --slide-bg: #1C2644;
+}
+
+.slide-b {
+  background: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Grid texture on navy */
+.b-grid-texture {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+}
+
+/* Top chrome bar */
+.b-topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 80px;
+  background: var(--navy-alt);
+  border-bottom: 1px solid var(--text-hint);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 80px;
+}
+
+.b-logo-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.b-topbar-right {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  color: var(--text-hint);
+  letter-spacing: 0.08em;
+}
+
+/* Central cream paper card */
+.b-card {
+  position: absolute;
+  left: 140px; right: 140px;
+  top: 140px; bottom: 160px;
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 110px;
+}
+
+/* Gold rules */
+.b-rule-top {
+  position: absolute;
+  top: 80px; left: 110px; right: 110px;
+  height: 1px;
+  background: var(--gold);
+}
+.b-rule-bottom {
+  position: absolute;
+  bottom: 80px; left: 110px; right: 110px;
+  height: 1px;
+  background: var(--gold);
+}
+
+/* Kicker */
+.b-kicker {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px;
+  color: var(--gold-dim);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 44px;
+}
+
+/* Main title — Source Serif 4, roman + italic mix */
+.b-title {
+  font-family: 'Source Serif 4', serif;
+  font-size: 108px;
+  font-weight: 700;
+  line-height: 0.92;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin: 0 0 52px 0;
+}
+.b-title em {
+  font-style: italic;
+  color: var(--gold-dim);
+}
+
+/* Description */
+.b-desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 26px;
+  font-weight: 300;
+  color: #3A3A3A;
+  line-height: 1.5;
+  max-width: 800px;
+  margin-bottom: 56px;
+}
+
+/* Meta row */
+.b-meta-row {
+  display: flex;
+  gap: 64px;
+  align-items: center;
+  border-top: 1px solid var(--cream-alt);
+  padding-top: 36px;
+}
+
+.b-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.b-meta-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.b-meta-value {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Bottom chrome */
+.b-footer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 100px;
+  background: var(--navy-alt);
+  border-top: 1px solid var(--text-hint);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 80px;
+}
+
+.b-footer-left {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  color: var(--text-hint);
+  letter-spacing: 0.08em;
+}
+
+.b-footer-right {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  color: var(--gold-dim);
+  letter-spacing: 0.1em;
+}
+
+/* === ANIMATIONS === */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes riseUp {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes cardReveal {
+  from { opacity: 0; transform: scale(0.97) translateY(16px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.slide.active .b-grid-texture { animation: fadeIn 1.2s 0s both; }
+.slide.active .b-topbar       { animation: fadeIn 0.4s 0.05s both; }
+.slide.active .b-card         { animation: cardReveal 0.8s 0.2s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .b-kicker       { animation: riseUp 0.5s 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .b-title        { animation: riseUp 0.65s 0.65s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .b-desc         { animation: riseUp 0.5s 0.82s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .b-meta-row     { animation: riseUp 0.45s 0.95s cubic-bezier(0.16,1,0.3,1) both; }
+.slide.active .b-footer       { animation: fadeIn 0.4s 0.1s both; }
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+  <div class="deck-stage">
+    <div class="slide slide-b active">
+
+      <div class="b-grid-texture"></div>
+
+      <div class="b-topbar">
+        <span class="b-logo-text">LF8 · Daten systemübergreifend bereitstellen</span>
+        <span class="b-topbar-right">Abschlussprojekt · 2026</span>
+      </div>
+
+      <div class="b-card">
+        <div class="b-rule-top"></div>
+        <div class="b-rule-bottom"></div>
+
+        <div class="b-kicker">Abschlussprojekt · Lernfeld 8</div>
+
+        <h1 class="b-title">Lernmaterial<em>verwaltung</em></h1>
+
+        <p class="b-desc">Zentrales Verwaltungssystem für Unterrichtsmaterialien auf Basis von Python, SQLAlchemy und MySQL — entwickelt im Rahmen der Ausbildung zum Anwendungsentwickler.</p>
+
+        <div class="b-meta-row">
+          <div class="b-meta-item">
+            <span class="b-meta-label">Vorgelegt von</span>
+            <span class="b-meta-value">Auric Ergeson</span>
+          </div>
+          <div class="b-meta-item">
+            <span class="b-meta-label">Zeitraum</span>
+            <span class="b-meta-value">06. Apr – 16. Mai 2026</span>
+          </div>
+          <div class="b-meta-item">
+            <span class="b-meta-label">Gesamtaufwand</span>
+            <span class="b-meta-value">43 Stunden</span>
+          </div>
+          <div class="b-meta-item">
+            <span class="b-meta-label">Stack</span>
+            <span class="b-meta-value">Python · SQLAlchemy · MySQL</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="b-footer">
+        <span class="b-footer-left">Prüfungsleistung · Ausbildungsjahr 2025 / 2026</span>
+        <span class="b-footer-right">01 / 12</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+function fitStage() {
+  const s = document.querySelector('.deck-stage');
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const sc = Math.min(vw / 1920, vh / 1080);
+  const tx = (vw - 1920 * sc) / 2;
+  const ty = (vh - 1080 * sc) / 2;
+  s.style.transform = `translate(${tx}px,${ty}px) scale(${sc})`;
+}
+fitStage();
+window.addEventListener('resize', fitStage);
+</script>
+</body>
+</html>

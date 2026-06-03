@@ -17,7 +17,8 @@
       "Bash(python -c ' *)",
       "Bash(node -e ' *)",
       "Bash(del test_out.docx)",
-      "Bash(Get-ChildItem C:\\\\Users\\\\auric\\\\Desktop\\\\Schule\\\\daten-system-bergreifend *)"
+      "Bash(Get-ChildItem C:\\\\Users\\\\auric\\\\Desktop\\\\Schule\\\\daten-system-bergreifend *)",
+      "mcp__lean-ctx__ctx_shell"
     ]
   }
 }

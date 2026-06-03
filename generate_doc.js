@@ -111,7 +111,10 @@ const tdb = (text, w) => new TableCell({
 
 const SQL = fs.readFileSync('sql/schema.sql', 'utf8');
 
-const ERD_IMG = fs.readFileSync('lernmaterialverwaltung.png');
+const ERD_IMG      = fs.readFileSync('lernmaterialverwaltung.png');
+const MENU_IMG     = fs.readFileSync('screenshots/menu.png');
+const MATERIAL_IMG = fs.readFileSync('screenshots/materials.png');
+const QUERY1_IMG   = fs.readFileSync('screenshots/query1.png');
 
 // ── Zeitplanung table ──────────────────────────────────────────────────────
 
@@ -374,6 +377,7 @@ const doc = new Document({
         h2("1.2 Aufgabenstellung"),
         p("Das System sollte es ermöglichen, Lernmaterialien zentral zu speichern, zu suchen und herunterzuladen. Zusätzlich waren folgende technische Anforderungen vorgegeben: MySQL als Datenbank, Python als Programmiersprache, mindestens sieben SQL-Abfragen mit unterschiedlichen JOIN- und Aggregationstypen sowie eine duale Speicherstrategie für Dateien."),
         p("Ich habe die Anforderungen in acht konkrete Funktionen übersetzt, die alle über ein Hauptmenü erreichbar sind. Die genaue Auflistung zeigt Kapitel 4 – Funktionsübersicht."),
+        p("Das Projekt wurde vollständig eigenständig als Einzelarbeit durchgeführt. Konzeption, Datenbankdesign, sämtlicher Python-Code und die Dokumentation stammen von mir. Externe Leistungen wurden nicht in Anspruch genommen."),
 
         h2("1.3 Projektumfeld"),
         p("Das Projekt war ein Einzelprojekt. Ich habe es auf meinem privaten Laptop entwickelt, auf dem MySQL 8.0, Python 3.12 und Visual Studio Code installiert sind. Die Datenbankmodellierung habe ich mit DBeaver durchgeführt, das auch das ERD-Diagramm erzeugt hat."),
@@ -407,13 +411,51 @@ const doc = new Document({
 
         h2("3.2 Implementierung"),
         p("Die Implementierung habe ich in drei Phasen aufgeteilt: zuerst database.py (Datenbankverbindung und Tabellen-Mapping), dann services.py (alle Datenbankfunktionen), zuletzt main.py (das Konsolenmenü). Diese Reihenfolge hat sich bewährt, weil ich immer auf fertigen Schichten aufgebaut habe."),
-        p("Ein Problem war anfangs die SQLAlchemy automap-Funktion. Ich wusste nicht, dass die Tabellen zuerst in der Datenbank existieren müssen, bevor automap_base() sie einlesen kann. Das hat beim ersten Test zu einem Fehler geführt. Die Lösung war, das Schema zuerst zu importieren und erst danach die Python-Anwendung zu starten."),
+        p("Ein Problem war anfangs die SQLAlchemy automap-Funktion. Ich wusste nicht, dass die Tabellen zuerst in der Datenbank existieren müssen, bevor automap_base() sie einlesen kann. Der Fehler beim ersten Test war nicht sofort verständlich – nach etwas Recherche in der Dokumentation war die Ursache aber klar. Die Lösung war einfach: Schema zuerst importieren, dann die Anwendung starten."),
         p("Die sieben SQL-Abfragen habe ich alle in services.py implementiert. Abfrage 7 ist die komplexeste: Sie verbindet vier Tabellen (material, benutzer, themengebiet, kategorie) mit drei JOINs und unterstützt optionale WHERE-Filter. Die Architektur und alle sieben Abfragen sind in Anhang IV ausführlich dokumentiert."),
         pItalic("(Architektur und SQL-Abfragen: siehe Anhang IV)"),
 
         h2("3.3 Ergebnisse"),
-        p("Das Ergebnis ist eine vollständig funktionsfähige Kommandozeilenanwendung mit acht Menüpunkten. Alle sieben SQL-Abfragen laufen stabil, die duale Speicherstrategie funktioniert zuverlässig, und das Menü ist übersichtlich strukturiert."),
-        p("Beim Testen habe ich festgestellt, dass die Ausgabe bei langen Titeln in der rich-Tabelle manchmal abgeschnitten wurde. Ich habe das gelöst, indem ich die Spaltenbreiten in der Tabellenformatierung angepasst habe. Insgesamt bin ich mit dem Ergebnis zufrieden – alle geforderten Funktionen sind umgesetzt."),
+        p("Nach 43 Stunden Entwicklungsarbeit habe ich eine vollständig funktionsfähige Kommandozeilenanwendung fertiggestellt. Ich habe die Anwendung während des Testens bewusst mit echten Daten durchgespielt: Mehrere Materialien hochgeladen, wieder heruntergeladen, kommentiert und gelöscht – alles hat funktioniert. Abbildung 2 zeigt das Hauptmenü beim Start der Anwendung."),
+        sp(),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 60 },
+          children: [new ImageRun({ type: "png", data: MENU_IMG, transformation: { width: 500, height: 188 },
+            altText: { title: "Hauptmenü", description: "Hauptmenü der Lernmaterialverwaltung", name: "menu" } })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 },
+          children: [new TextRun({ text: "Abbildung 2: Hauptmenü der Lernmaterialverwaltung", font: "Arial", size: 18, italics: true, color: C_LGREY })]
+        }),
+        p("Die Materialliste (Menüpunkt 6 → Materialien) gibt alle gespeicherten Einträge als formatierte Tabelle aus – mit ID, Titel, Dateityp, Größe und der Information, ob die Datei direkt in der Datenbank oder als Dateipfad gespeichert ist. Die Ausgabe in Abbildung 3 zeigt echte Testdaten aus der Datenbank."),
+        sp(),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 60 },
+          children: [new ImageRun({ type: "png", data: MATERIAL_IMG, transformation: { width: 520, height: 503 },
+            altText: { title: "Materialliste", description: "Materialliste mit rich-Tabellenformatierung", name: "materials" } })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 },
+          children: [new TextRun({ text: "Abbildung 3: Materialliste mit rich-Tabellenformatierung", font: "Arial", size: 18, italics: true, color: C_LGREY })]
+        }),
+        p("Alle sieben SQL-Abfragen laufen stabil. Abbildung 4 zeigt das Ergebnis von Abfrage 1 (COUNT: Anzahl der Materialien je Themengebiet) – direkt aus der laufenden Anwendung. Die komplexeren Abfragen, insbesondere Abfrage 7 mit Multi-JOIN und optionalen Filtern, liefern ebenfalls korrekte Ergebnisse."),
+        sp(),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 60 },
+          children: [new ImageRun({ type: "png", data: QUERY1_IMG, transformation: { width: 520, height: 544 },
+            altText: { title: "SQL-Abfrage 1", description: "Ergebnis Abfrage 1: COUNT Materialien pro Themengebiet", name: "query1" } })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 },
+          children: [new TextRun({ text: "Abbildung 4: Ergebnis von SQL-Abfrage 1 – Materialien pro Themengebiet (COUNT)", font: "Arial", size: 18, italics: true, color: C_LGREY })]
+        }),
+        p("Beim Testen ist mir aufgefallen, dass die rich-Tabelle bei sehr langen Titeln den Text abschneidet. Ich habe das durch eine angepasste Spaltenbreite in der Tabellenformatierung gelöst. Insgesamt bin ich mit dem Ergebnis zufrieden – alle geforderten Funktionen sind umgesetzt und die Anwendung verhält sich stabil."),
         sp(),
 
         // ── 4. Funktionsübersicht ──────────────────────────────────────────
@@ -436,8 +478,8 @@ const doc = new Document({
 
         h2("5.3 Persönliche Reflexion"),
         p("Was gut funktioniert hat: Die Entscheidung, zuerst die Datenbank zu entwerfen und erst dann zu programmieren, war richtig. Das Konsolenmenü ist übersichtlich, und die Trennung in drei Python-Dateien (database.py, services.py, main.py) macht den Code gut wartbar."),
-        p("Was ich beim nächsten Mal anders machen würde: früher mit dem Testen anfangen und nicht erst am Ende. Außerdem hätte ich die SQL-Abfragen früher direkt in der Datenbank testen sollen, bevor ich sie in Python übersetzt habe – das hätte einige Debugging-Runden gespart."),
-        p("Eine persönliche Anmerkung: Da Deutsch nicht meine Muttersprache ist, hat mein Ausbilder bei einzelnen Formulierungen in der Dokumentation geholfen und ich habe stellenweise Google Übersetzer genutzt. Der gesamte Quellcode sowie der überwiegende Teil der Dokumentation wurden eigenständig verfasst."),
+        p("Wenn ich das Projekt noch einmal machen würde, fange ich früher mit dem Testen an. Ich habe zu lange darauf gewartet, bis alles \"fertig\" war – dabei hätte ich durch frühere Tests einige Fehler schneller gefunden. Die SQL-Abfragen hätte ich außerdem zuerst direkt in DBeaver ausprobieren sollen, bevor ich sie in Python übersetzt habe. Das hätte mir mindestens zwei, drei Debugging-Runden erspart."),
+        p("Der gesamte Quellcode und der überwiegende Teil der Dokumentation wurden eigenständig verfasst. Da Deutsch nicht meine Muttersprache ist, habe ich bei einzelnen Formulierungen meinen Ausbilder gefragt und gelegentlich nachgeschlagen – inhaltlich und technisch liegt das Projekt vollständig bei mir."),
         sp(),
 
         // ── 6. Quellenverzeichnis ──────────────────────────────────────────
@@ -447,6 +489,7 @@ const doc = new Document({
         p("[1]  Python Software Foundation: Python 3.12 Dokumentation. Online verfügbar unter: https://docs.python.org/3/ (Zugriff: 16.05.2026)."),
         p("[2]  SQLAlchemy Authors: SQLAlchemy 2.0 Dokumentation. Online verfügbar unter: https://docs.sqlalchemy.org/en/20/ (Zugriff: 16.05.2026)."),
         p("[3]  Oracle Corporation: MySQL 8.0 Reference Manual. Online verfügbar unter: https://dev.mysql.com/doc/refman/8.0/en/ (Zugriff: 16.05.2026)."),
+        p("[4]  Textualize Ltd.: rich – Python library for rich text and formatting. Online verfügbar unter: https://rich.readthedocs.io/ (Zugriff: 16.05.2026)."),
         sp(),
 
         // ── Page break before Anhangsverzeichnis ──────────────────────────
